@@ -8,6 +8,10 @@ ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliab
   Make sure to store your backup files outside of your cluster. 
   Contributions of implementations of ICentralBackupStore more than welcome! 
 
+## Demo
+Run the demo app on your local dev cluster, to see how it works.
+https://github.com/loekd/ServiceFabric.BackupRestore/tree/master/demo
+
 ## Enable your Stateful Service for Backup & Restore:
 
 1. Add the nuget package https://www.nuget.org/packages/ServiceFabric.BackupRestore/
