@@ -55,13 +55,15 @@ ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliab
   
 ## Calling application
 1. Create an application that calls your Service to perform Backup & Restore operations
-2. Create a backup asynchronously
+2. Add the nuget package to your calling application too:  https://www.nuget.org/packages/ServiceFabric.BackupRestore/
+3. Add a reference to the Stateful Service project
+4. Create a backup asynchronously
 
   ``` csharp
   var proxy = ServiceProxy.Create<IMyStatefulService>(ServiceUri, servicePartitionKey);
   await proxy.BeginCreateBackup();
   ```
-3. List all central backups
+5. List all central backups
  
   ``` csharp
   var proxy = ServiceProxy.Create<IMyStatefulService>(ServiceUri, servicePartitionKey);
@@ -69,7 +71,7 @@ ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliab
 						Console.WriteLine($"Backup Id\t\t\t\tOriginal partition");
 						Console.WriteLine(string.Join(Environment.NewLine, list.Select(data => $"             {data.BackupId}\t{data.OriginalServicePartitionId}")));
   ```
-4. Restore a backup asynchronously
+6. Restore a backup asynchronously
  
   ``` csharp
   var proxy = ServiceProxy.Create<IMyStatefulService>(ServiceUri, servicePartitionKey);
