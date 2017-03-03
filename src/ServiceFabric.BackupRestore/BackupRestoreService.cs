@@ -6,8 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Data;
-using Microsoft.ServiceFabric.Services.Communication.Runtime;
-using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace ServiceFabric.BackupRestore
@@ -24,7 +22,7 @@ namespace ServiceFabric.BackupRestore
 		private readonly Action<string> _logCallback;
 
 		/// <summary>
-		/// Endpoint at which this service communicates through SF remoting and <see cref="IBackupRestoreService"/>
+		/// Endpoint at which this service may communicate through SF remoting and <see cref="IBackupRestoreService"/>
 		/// </summary>
 		public const string BackupRestoreServiceEndpointName = "BackupRestoreServiceEndPoint";
 
@@ -59,15 +57,6 @@ namespace ServiceFabric.BackupRestore
 			_logCallback = logCallback;
 		}
 
-		/// <summary>
-		/// Returns a Service Remoting Listener that can be used to perform backup and restore operations on this replica. 
-		/// Call 'base' when overriding this method!
-		/// </summary>
-		/// <returns>A collection of listeners.</returns>
-		protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
-		{
-			yield return new ServiceReplicaListener(this.CreateServiceRemotingListener, BackupRestoreServiceEndpointName);
-		}
 		
 		/// <inheritdoc />
 		public async Task BeginCreateBackup()

@@ -2,7 +2,7 @@
   "testRunner": "mstest",
   "copyright": "2017",
   "title": "ServiceFabric.BackupRestore.Tests",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "Unit tests",
   "authors": [ "Loek Duys" ],
   "frameworks": {
