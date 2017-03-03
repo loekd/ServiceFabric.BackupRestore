@@ -11,6 +11,7 @@ ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliab
 ## Demo
 Run the demo app on your local dev cluster, to see how it works.
 https://github.com/loekd/ServiceFabric.BackupRestore/tree/master/demo
+Change this line https://github.com/loekd/ServiceFabric.BackupRestore/blob/master/demo/MyStatefulService/Program.cs#L25 to point to a folder on your dev box.
 
 ## Enable your Stateful Service for Backup & Restore:
 
