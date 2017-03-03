@@ -1,0 +1,29 @@
+﻿{
+  "testRunner": "mstest",
+  "copyright": "2017",
+  "title": "ServiceFabric.BackupRestore.Tests",
+  "version": "0.9.2",
+  "description": "Unit tests",
+  "authors": [ "Loek Duys" ],
+  "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Numerics": "4.0.0.0"
+      }
+    },
+    "net460": {
+      "frameworkAssemblies": {
+        "System.Numerics": "4.0.0.0"
+      }
+    }
+  },
+  "buildOptions": {
+    "platform": "x64"
+  },
+  "dependencies": {
+    "ServiceFabric.BackupRestore": { "target": "project" },
+    "MSTest.TestFramework": "1.0.1-preview",
+    "dotnet-test-mstest": "1.1.1-preview",
+    "Microsoft.ServiceFabric.Services": "2.4.164"
+  }
+}
