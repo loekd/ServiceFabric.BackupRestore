@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.ServiceFabric.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ServiceFabric.BackupRestore.Tests
@@ -97,7 +98,7 @@ namespace ServiceFabric.BackupRestore.Tests
 			var store = new FileStore(Remote);
 
 			//act
-			var result = await store.UploadBackupFolderAsync(partitionId, Local, CancellationToken.None);
+			var result = await store.UploadBackupFolderAsync(BackupOption.Full, partitionId, Local, CancellationToken.None);
 			string dateTimeFolder = store.CreateDateTimeFolderName(partitionId, result.TimeStampUtc);
 
 			//asserts
@@ -143,7 +144,7 @@ namespace ServiceFabric.BackupRestore.Tests
 			
 
 			//save backup metadata
-			await store.StoreBackupMetadataAsync(backupFolder, new BackupMetadata(partitionId, timeStampUtc, backupId));
+			await store.StoreBackupMetadataAsync(backupFolder, new BackupMetadata(partitionId, timeStampUtc, BackupOption.Full, backupId));
 
 			//fake SF backup metadata
 			File.WriteAllText(Path.Combine(backupFolder, FileStore.BackupMetadataFileName), "");

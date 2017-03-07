@@ -1,4 +1,5 @@
 using System;
+using Microsoft.ServiceFabric.Data;
 
 namespace ServiceFabric.BackupRestore
 {
@@ -13,16 +14,16 @@ namespace ServiceFabric.BackupRestore
 		public string RelativeFolder { get; set; }
 
 
-		public FileBackupMetadata(string relativeFolder, Guid originalServicePartitionId, DateTime timeStampUtc)
-			: base(originalServicePartitionId, timeStampUtc)
+		public FileBackupMetadata(string relativeFolder, Guid originalServicePartitionId, DateTime timeStampUtc, BackupOption backupOption)
+			: base(originalServicePartitionId, timeStampUtc, backupOption)
 		{
 			if (string.IsNullOrWhiteSpace(relativeFolder))
 				throw new ArgumentException("Value cannot be null or whitespace.", nameof(relativeFolder));
 			RelativeFolder = relativeFolder;
 		}
 
-		public FileBackupMetadata(string relativeFolder, Guid originalServicePartitionId, DateTime timeStampUtc, Guid backupId)
-			: base(originalServicePartitionId, timeStampUtc, backupId)
+		public FileBackupMetadata(string relativeFolder, Guid originalServicePartitionId, DateTime timeStampUtc, BackupOption backupOption,  Guid backupId)
+			: base(originalServicePartitionId, timeStampUtc, backupOption, backupId)
 		{
 			if (string.IsNullOrWhiteSpace(relativeFolder))
 				throw new ArgumentException("Value cannot be null or whitespace.", nameof(relativeFolder));

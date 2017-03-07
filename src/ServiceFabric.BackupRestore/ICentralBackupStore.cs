@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.ServiceFabric.Data;
 
 namespace ServiceFabric.BackupRestore
 {
@@ -13,11 +14,12 @@ namespace ServiceFabric.BackupRestore
 		/// <summary>
 		/// Copies contents from the provided <paramref name="sourceDirectory"/> on the node, to a new backup folder in the central store.
 		/// </summary>
-		/// <param name="sourceDirectory"></param>
-		/// <param name="servicePartitionId"></param>
+		/// <param name="sourceDirectory">The source folder on the current Node.</param>
+		/// <param name="backupOption">Indicates the type of backup.</param>
+		/// <param name="servicePartitionId">Partition Guid of replica</param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		Task<BackupMetadata> UploadBackupFolderAsync(Guid servicePartitionId, string sourceDirectory, CancellationToken cancellationToken);
+		Task<BackupMetadata> UploadBackupFolderAsync(BackupOption backupOption, Guid servicePartitionId, string sourceDirectory, CancellationToken cancellationToken);
 
 
 		/// <summary>
@@ -40,7 +42,7 @@ namespace ServiceFabric.BackupRestore
 		/// Lists all known backup metadata.
 		/// </summary>
 		/// <returns></returns>
-		Task<IEnumerable<BackupMetadata>> GetBackupMetadataAsync(Guid? backupInfoId = null);
+		Task<IEnumerable<BackupMetadata>> GetBackupMetadataAsync(Guid? backupInfoId = null, Guid? servicePartitionId = null);
 
 		/// <summary>
 		/// Schedules a backup to be restored.

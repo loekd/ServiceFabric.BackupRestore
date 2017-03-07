@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.ServiceFabric.Data;
 using Newtonsoft.Json;
 
 namespace ServiceFabric.BackupRestore
@@ -27,6 +28,11 @@ namespace ServiceFabric.BackupRestore
 		public const string BackupMetadataFileName = "backup.metadata";
 
 		/// <summary>
+		/// The name of a file that contains ServiceFabric related metadata about an incremental backup.
+		/// </summary>
+		public const string IncrementalBackupMetadataFileName = "incremental.metadata"; 
+
+		/// <summary>
 		/// Creates a new instance.
 		/// </summary>
 		/// <param name="remoteFolderName">A shared folder that is not on any of the cluster nodes.
@@ -41,7 +47,7 @@ namespace ServiceFabric.BackupRestore
 		}
 
 		/// <inheritdoc />
-		public async Task<BackupMetadata> UploadBackupFolderAsync(Guid servicePartitionId, string sourceDirectory,
+		public async Task<BackupMetadata> UploadBackupFolderAsync(BackupOption backupOption, Guid servicePartitionId, string sourceDirectory,
 			CancellationToken cancellationToken)
 		{
 			//use folder names containing the service partition and the utc date:
@@ -52,7 +58,7 @@ namespace ServiceFabric.BackupRestore
 			await CopyFolderAsync(sourceDirectory, destinationFolder, cancellationToken);
 			
 			//create metadata to return
-			var info = new BackupMetadata(servicePartitionId, timeStamp);
+			var info = new BackupMetadata(servicePartitionId, timeStamp, backupOption);
 			
 			//store the backup id.
 			await StoreBackupMetadataAsync(destinationFolder, info);
@@ -72,11 +78,11 @@ namespace ServiceFabric.BackupRestore
 		}
 
 		/// <inheritdoc />
-		public async Task<IEnumerable<BackupMetadata>> GetBackupMetadataAsync(Guid? backupId = null)
+		public async Task<IEnumerable<BackupMetadata>> GetBackupMetadataAsync(Guid? backupId = null, Guid? servicePartitionId = null)
 		{
 			//get all metadata
-			var metadata = await GetBackupMetadataPrivateAsync(backupId);
-			return metadata.Select(m => new BackupMetadata(m.OriginalServicePartitionId, m.TimeStampUtc, m.BackupId));
+			var metadata = await GetBackupMetadataPrivateAsync(backupId, servicePartitionId);
+			return metadata.Select(m => new BackupMetadata(m.OriginalServicePartitionId, m.TimeStampUtc, m.BackupOption, m.BackupId));
 		}
 		
 		/// <inheritdoc />
@@ -121,8 +127,9 @@ namespace ServiceFabric.BackupRestore
 		/// Queries all metadata, optionally filtered by <paramref name="backupId"/>.
 		/// </summary>
 		/// <param name="backupId"></param>
+		/// <param name="servicePartitionId"></param>
 		/// <returns></returns>
-		internal Task<IEnumerable<FileBackupMetadata>> GetBackupMetadataPrivateAsync(Guid? backupId = null)
+		internal Task<IEnumerable<FileBackupMetadata>> GetBackupMetadataPrivateAsync(Guid? backupId = null, Guid? servicePartitionId = null)
 		{
 			return Task.Run(() =>
 			{
@@ -130,15 +137,15 @@ namespace ServiceFabric.BackupRestore
 					let dirInfo = new DirectoryInfo(d)
 					let dirParentInfo = dirInfo.Parent
 					let metadata = BackupMetadataFromDirectory(d)
-					where File.Exists(Path.Combine(d, BackupMetadataFileName)) //find folders with a SF metadata file
-					      && (backupId == null || metadata?.BackupId == backupId.Value)
-					//and optionally with the provided backup id
-
+					where (File.Exists(Path.Combine(d, BackupMetadataFileName))				//find folders with a SF metadata file
+							|| File.Exists(Path.Combine(d, IncrementalBackupMetadataFileName)))
+						  && (backupId == null || metadata?.BackupId == backupId.Value)     //and optionally with the provided backup id
+						  && (servicePartitionId == null || metadata?.OriginalServicePartitionId == servicePartitionId.Value)     //and optionally with the servicePartitionId
 					orderby dirInfo.Parent?.Name, dirInfo.Name
 					select
 					new FileBackupMetadata(//build a metadata description
  
-						d.Replace(_remoteFolderName, string.Empty), metadata.OriginalServicePartitionId, metadata.TimeStampUtc, metadata.BackupId);       
+						d.Replace(_remoteFolderName, string.Empty), metadata.OriginalServicePartitionId, metadata.TimeStampUtc, metadata.BackupOption, metadata.BackupId);       
 
 				return query;
 			});

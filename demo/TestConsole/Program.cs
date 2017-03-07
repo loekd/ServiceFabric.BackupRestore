@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Client;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
 using MyStatefulService;
@@ -91,8 +92,19 @@ namespace TestConsole
 						Console.WriteLine($"State saved: '{input}'");
 						break;
 					case ConsoleKey.D3:
-						Console.WriteLine("Starting the creation of a backup");
-						await proxy.BeginCreateBackup();
+						Console.WriteLine("Type 1 for full backup or 2 for incremental backup (incremental requires full backup to exist)");
+						key = Console.ReadKey(true);
+						if (ConsoleKey.D1 == key.Key)
+						{
+							Console.WriteLine("Creating a full backup asynchronously...");
+							await proxy.BeginCreateBackup(BackupOption.Full);
+						}
+						else
+						{
+							Console.WriteLine("Creating an incremental backup asynchronously...");
+							await proxy.BeginCreateBackup(BackupOption.Incremental);
+						}
+						
 						break;
 					case ConsoleKey.D4:
 						Console.WriteLine($"Starting the restore of a backup");
@@ -111,8 +123,8 @@ namespace TestConsole
 					case ConsoleKey.D5:
 						Console.WriteLine($"List all central backups");
 						var list = await proxy.ListBackups();
-						Console.WriteLine($"Backup Id\t\t\t\tOriginal partition");
-						Console.WriteLine(string.Join(Environment.NewLine, list.Select(data => $"{data.BackupId}\t{data.OriginalServicePartitionId}")));
+						Console.WriteLine($"Original partition\t\t\tBackup Id\t\t\t\tBackup Type");
+						Console.WriteLine(string.Join(Environment.NewLine, list.Select(data => $"{data.BackupId}\t{data.OriginalServicePartitionId}\t{data.BackupOption}")));
 						break;
 
 					case ConsoleKey.D6:

@@ -2,7 +2,7 @@
   "testRunner": "mstest",
   "copyright": "2017",
   "title": "ServiceFabric.BackupRestore.Tests",
-  "version": "0.9.3",
+  "version": "1.0.0",
   "description": "Unit tests",
   "authors": [ "Loek Duys" ],
   "frameworks": {
@@ -24,6 +24,7 @@
     "ServiceFabric.BackupRestore": { "target": "project" },
     "MSTest.TestFramework": "1.0.1-preview",
     "dotnet-test-mstest": "1.1.1-preview",
-    "Microsoft.ServiceFabric.Services": "2.4.164"
+    "Microsoft.ServiceFabric.Services": "2.4.164",
+    "Microsoft.ServiceFabric.Actors": "2.4.164"
   }
 }

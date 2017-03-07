@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Remoting;
 
 namespace ServiceFabric.BackupRestore
@@ -10,7 +11,7 @@ namespace ServiceFabric.BackupRestore
 		/// Asynchronously starts the creation of a backup of the state of this replica and stores that into the central store.
 		/// </summary>
 		/// <returns></returns>
-		Task BeginCreateBackup();
+		Task BeginCreateBackup(BackupOption backupOption);
 
 		/// <summary>
 		/// Asynchronously starts a restore operation using the state indicated by <paramref name="backupMetadata"/>. 

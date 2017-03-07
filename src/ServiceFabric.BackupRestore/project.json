@@ -1,7 +1,7 @@
 ﻿{
   "copyright": "2017",
   "title": "ServiceFabric.BackupRestore",
-  "version": "0.9.3",
+  "version": "1.0.0",
   "description": "ServiceFabric.BackupRestore adds backup and restore features to your Reliable Stateful Services in Service Fabric. How to use this package: https://github.com/loekd/ServiceFabric.BackupRestore/blob/master/README.md",
   "authors": [ "Loek Duys" ],
   "packOptions": {
@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "Newtonsoft.Json": "9.0.1",
-    "Microsoft.ServiceFabric.Services": "2.4.164"
+    "Microsoft.ServiceFabric.Services": "2.4.164",
+    "Microsoft.ServiceFabric.Actors": "2.4.164"
   }
 }

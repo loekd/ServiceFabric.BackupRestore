@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using Microsoft.ServiceFabric.Data;
 using Newtonsoft.Json;
 
 namespace ServiceFabric.BackupRestore
@@ -28,6 +29,12 @@ namespace ServiceFabric.BackupRestore
 		[DataMember]
 		public readonly DateTime TimeStampUtc;
 
+		/// <summary>
+		/// Indicates the type of backup.
+		/// </summary>
+		[DataMember]
+		public readonly BackupOption BackupOption;
+
 		//maybe add file hashes?
 
 		/// <summary>
@@ -35,8 +42,9 @@ namespace ServiceFabric.BackupRestore
 		/// </summary>
 		/// <param name="originalServicePartitionId">Indicates the Stateful Service Parition Guid that the backup was created for.</param>
 		/// <param name="timeStampUtc">Indicates when the backup was created.</param>
-		public BackupMetadata(Guid originalServicePartitionId, DateTime timeStampUtc)
-			 : this(originalServicePartitionId, timeStampUtc, Guid.NewGuid())
+		/// <param name="backupOption">Indicates the type of backup.</param>
+		public BackupMetadata(Guid originalServicePartitionId, DateTime timeStampUtc, BackupOption backupOption)
+			 : this(originalServicePartitionId, timeStampUtc, backupOption, Guid.NewGuid())
 		{
 		}
 
@@ -45,13 +53,15 @@ namespace ServiceFabric.BackupRestore
 		/// </summary>
 		/// <param name="originalServicePartitionId">Indicates the Stateful Service Parition Guid that the backup was created for.</param>
 		/// <param name="timeStampUtc">Indicates when the backup was created.</param>
+		/// <param name="backupOption">Indicates the type of backup.</param>
 		/// <param name="backupId">Unique identifier for a backup.</param>
 		[JsonConstructor]
-		public BackupMetadata(Guid originalServicePartitionId, DateTime timeStampUtc, Guid backupId)
+		public BackupMetadata(Guid originalServicePartitionId, DateTime timeStampUtc, BackupOption backupOption, Guid backupId)
 		{
 			BackupId = backupId;
 			OriginalServicePartitionId = originalServicePartitionId;
 			TimeStampUtc = timeStampUtc;
+			BackupOption = backupOption;
 		}
 	}
 }
