@@ -7,10 +7,16 @@ ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliab
 	Added support for ActorServices using `BackupRestoreActorService`
 
 - 0.9.2 First version. 
-  
-  Has 1 central store implementation: FileStore.
-  Make sure to store your backup files outside of your cluster. 
-  Contributions of implementations of ICentralBackupStore more than welcome! 
+  - This version has only 1 central store implementation: FileStore.
+  - It works for Stateful Services only.
+  - It takes full backups, and performs forced restores.
+  - Make sure to store your backup files outside of your cluster. 
+  - Contributions are more than welcome! 
+
+## Demo
+Run the demo app on your local dev cluster, to see how it works.
+https://github.com/loekd/ServiceFabric.BackupRestore/tree/master/demo
+Change this line https://github.com/loekd/ServiceFabric.BackupRestore/blob/master/demo/MyStatefulService/Program.cs#L25 to point to a folder on your dev box.
 
 ## Enable your Stateful Service for Backup & Restore:
 
