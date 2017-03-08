@@ -1,5 +1,5 @@
 # ServiceFabric.BackupRestore
-ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliable Stateful Service replicas.
+ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliable Stateful Service replicas. Store your backups safely outside of the cluster by using / implementing ICentralBackupStore.
 
 ## Change log
 - 1.0.0 
