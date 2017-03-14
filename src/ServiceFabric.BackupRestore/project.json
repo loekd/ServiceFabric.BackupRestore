@@ -7,7 +7,7 @@
   "packOptions": {
     "projectUrl": "https://github.com/loekd/ServiceFabric.BackupRestore",
     "licenseUrl": "https://github.com/loekd/ServiceFabric.BackupRestore/blob/master/LICENSE.md",
-    "summary": "Adds some Service operations that enable simple backup and restore of state.",
+    "summary": "Adds some Service operations that enable simple backup and restore of state. Allows backups to be stored away from the cluster.",
     "tags": [ "ServiceFabric", "Service", "Fabric", "Stateful", "Reliable", "Backup", "Restore"],
     "files": {
       "include": "Content/readme.md"

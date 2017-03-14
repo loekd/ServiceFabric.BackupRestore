@@ -1,5 +1,5 @@
 # ServiceFabric.BackupRestore
-ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliable Stateful Service replicas.
+ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliable Stateful Service replicas. Store your backups safely outside of the cluster by using / implementing ICentralBackupStore.
 
 ## Change log
 
@@ -72,11 +72,11 @@ Change this line https://github.com/loekd/ServiceFabric.BackupRestore/blob/maste
 1. Create an application that calls your Service to perform Backup & Restore operations
 2. Add the nuget package to your calling application too:  https://www.nuget.org/packages/ServiceFabric.BackupRestore/
 3. Add a reference to the Stateful Service project
-4. Create a backup asynchronously
+4. Create a full backup asynchronously
 
   ``` csharp
   var proxy = ServiceProxy.Create<IMyStatefulService>(ServiceUri, servicePartitionKey);
-  await proxy.BeginCreateBackup();
+  await proxy.BeginCreateBackup(BackupOption.Full);  //use BackupOption.Incremental for incremental backup
   ```
 5. List all central backups
  
