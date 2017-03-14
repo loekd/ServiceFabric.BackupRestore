@@ -13,7 +13,7 @@ namespace ServiceFabric.BackupRestore
 	internal static class BackupRestoreServiceInternalExtensions
 	{
 		/// <summary>
-		/// 
+		/// Asynchronously starts the creation of a backup of the state of this replica and stores that into the central store.
 		/// </summary>
 		/// <param name="service"></param>
 		/// <param name="backupOption"></param>
@@ -27,12 +27,14 @@ namespace ServiceFabric.BackupRestore
 		}
 
 		/// <summary>
-		/// 
+		/// Asynchronously starts a restore operation using the state indicated by <paramref name="backupMetadata"/>. 
+		/// The backup is retrieved from the central store.
 		/// </summary>
 		/// <param name="service"></param>
+		/// <param name="dataLossMode"></param>
 		/// <param name="backupMetadata"></param>
 		/// <returns></returns>
-		public static async Task BeginRestoreBackup(this IBackupRestoreServiceInternal service, BackupMetadata backupMetadata)
+		public static async Task BeginRestoreBackup(this IBackupRestoreServiceInternal service, BackupMetadata backupMetadata, DataLossMode dataLossMode)
 		{
 			service.LogCallback?.Invoke($"BackupRestoreService - Beginning restore backup {backupMetadata.BackupId} for partition {service.Context.PartitionId}.");
 
@@ -40,18 +42,17 @@ namespace ServiceFabric.BackupRestore
 
 			await service.CentralBackupStore.ScheduleBackupAsync(service.Context.PartitionId, backupMetadata.BackupId);
 
-			var partitionSelector = PartitionSelector.PartitionKeyOf(service.Context.ServiceName,
-				((Int64RangePartitionInformation)service.Partition.PartitionInfo).LowKey);
+			var partitionSelector = PartitionSelector.PartitionIdOf(service.Context.ServiceName, service.Context.PartitionId);
 
 			var operationId = Guid.NewGuid();
-			await new FabricClient(FabricClientRole.Admin).TestManager.StartPartitionDataLossAsync(operationId, partitionSelector, DataLossMode.FullDataLoss);
+			await new FabricClient(FabricClientRole.Admin).TestManager.StartPartitionDataLossAsync(operationId, partitionSelector, dataLossMode);
 			//Causes OnDataLossAsync to be called.
 
 			service.LogCallback?.Invoke($"BackupRestoreService - Begun restore backup {backupMetadata.BackupId} for partition {service.Context.PartitionId}.");
 		}
 
 		/// <summary>
-		/// 
+		/// Lists all centrally stored backups.
 		/// </summary>
 		/// <param name="service"></param>
 		/// <returns></returns>
@@ -83,7 +84,8 @@ namespace ServiceFabric.BackupRestore
 		}
 
 		/// <summary>
-		/// 
+		/// This method is called during suspected data loss.
+		/// You can use this method to restore the service in case of data loss.
 		/// </summary>
 		/// <param name="service"></param>
 		/// <param name="restoreCtx"></param>

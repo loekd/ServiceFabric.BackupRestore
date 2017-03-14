@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Fabric;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -115,7 +116,21 @@ namespace TestConsole
 						Guid index;
 						if (Guid.TryParse(input, out index))
 						{
-							await proxy.BeginRestoreBackup(backups.Single(b => b.BackupId == index));
+							DataLossMode lossMode = DataLossMode.FullDataLoss;
+							Console.WriteLine("Type 1 for full data loss or 2 for partial data loss.");
+
+							key = Console.ReadKey(true);
+							if (ConsoleKey.D1 == key.Key)
+							{
+								Console.WriteLine("Restoring backup with full data loss asynchronously...");
+							}
+							else
+							{
+								Console.WriteLine("Restoring backup with partial data loss asynchronously...");
+								lossMode = DataLossMode.PartialDataLoss;
+							}
+							
+							await proxy.BeginRestoreBackup(backups.Single(b => b.BackupId == index), lossMode);
 							Console.WriteLine($"Restore is active. This will take some time. Check progress in SF explorer.");
 						}
 

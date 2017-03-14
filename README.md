@@ -2,9 +2,14 @@
 ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliable Stateful Service replicas.
 
 ## Change log
+
+- 1.1.0 
+	- Added support for DataLossMode when restoring backups.
+	- Added support for all partition types.
+
 - 1.0.0 
-	Added support for incremental backups.
-	Added support for ActorServices using `BackupRestoreActorService`
+	- Added support for incremental backups.
+	- Added support for ActorServices using `BackupRestoreActorService`
 
 - 0.9.2 First version. 
   - This version has only 1 central store implementation: FileStore.

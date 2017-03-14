@@ -63,9 +63,9 @@ namespace ServiceFabric.BackupRestore
 		}
 
 		/// <inheritdoc />
-		public Task BeginRestoreBackup(BackupMetadata backupMetadata)
+		public Task BeginRestoreBackup(BackupMetadata backupMetadata, DataLossMode dataLossMode)
 		{
-			return BackupRestoreServiceInternalExtensions.BeginRestoreBackup(this, backupMetadata);
+			return BackupRestoreServiceInternalExtensions.BeginRestoreBackup(this, backupMetadata, dataLossMode);
 		}
 
 		/// <inheritdoc />

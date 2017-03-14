@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Fabric;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Remoting;
@@ -18,7 +19,7 @@ namespace ServiceFabric.BackupRestore
 		/// The backup is retrieved from the central store.
 		/// </summary>
 		/// <returns></returns>
-		Task BeginRestoreBackup(BackupMetadata backupMetadata);
+		Task BeginRestoreBackup(BackupMetadata backupMetadata, DataLossMode dataLossMode);
 
 		/// <summary>
 		/// Lists all centrally stored backups.

@@ -1,7 +1,7 @@
 ﻿{
   "copyright": "2017",
   "title": "ServiceFabric.BackupRestore",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "ServiceFabric.BackupRestore adds backup and restore features to your Reliable Stateful Services in Service Fabric. How to use this package: https://github.com/loekd/ServiceFabric.BackupRestore/blob/master/README.md",
   "authors": [ "Loek Duys" ],
   "packOptions": {

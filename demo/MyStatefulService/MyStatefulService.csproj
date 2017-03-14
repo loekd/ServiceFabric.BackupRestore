@@ -69,8 +69,8 @@
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ServiceFabric.BackupRestore, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\ServiceFabric.BackupRestore.1.0.0\lib\net451\ServiceFabric.BackupRestore.dll</HintPath>
+    <Reference Include="ServiceFabric.BackupRestore, Version=1.1.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\ServiceFabric.BackupRestore.1.1.0\lib\net451\ServiceFabric.BackupRestore.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ServiceFabricServiceModel, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=AMD64">
