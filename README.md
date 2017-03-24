@@ -3,6 +3,9 @@ ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliab
 
 ## Change log
 
+- 1.2.0
+	- Upgraded nuget packages (SF 2.5.216, JSON 10.0.1)
+
 - 1.1.0 
 	- Added support for DataLossMode when restoring backups.
 	- Added support for all partition types.
