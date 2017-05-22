@@ -139,7 +139,7 @@ namespace TestConsole
 						Console.WriteLine($"List all central backups");
 						var list = await proxy.ListBackups();
 						Console.WriteLine($"Original partition\t\t\tBackup Id\t\t\t\tBackup Type");
-						Console.WriteLine(string.Join(Environment.NewLine, list.Select(data => $"{data.BackupId}\t{data.OriginalServicePartitionId}\t{data.BackupOption}")));
+						Console.WriteLine(string.Join(Environment.NewLine, list.Select(data => $"{data.OriginalServicePartitionId}\t{data.BackupId}\t{data.BackupOption}")));
 						break;
 
 					case ConsoleKey.D6:

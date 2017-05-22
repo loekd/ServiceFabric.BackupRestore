@@ -22,11 +22,8 @@ namespace MyStatefulService
 					context =>
 					{
 						string serviceName = context.ServiceName.AbsoluteUri.Replace(":", string.Empty).Replace("/", "-");
-						string remoteFolderName = Path.Combine(@"c:\temp", serviceName);
-                        #warning change this folder in your own project!
-                        //this should not point to C:\ in production, instead use a mapped network share that stores data outside the cluster.
-                        //make sure the account running this service has R/W access to the location.
-                        Directory.CreateDirectory(remoteFolderName);
+						string remoteFolderName = Path.Combine(@"E:\sfbackups", serviceName);
+						//make sure the account running this service has R/W access to the location.
 						var centralBackupStore = new FileStore(remoteFolderName);
 
 						return new MyStatefulService(context, centralBackupStore, log => ServiceEventSource.Current.ServiceMessage(context, log));
