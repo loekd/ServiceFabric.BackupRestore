@@ -1,17 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26510.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ServiceFabric.BackupRestore", "src\ServiceFabric.BackupRestore\ServiceFabric.BackupRestore.xproj", "{42BE1897-995D-4466-9E7C-7A3EC9035EF9}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ServiceFabric.BackupRestore.Tests", "test\ServiceFabric.BackupRestore.Tests\ServiceFabric.BackupRestore.Tests.xproj", "{6CD12A6A-6136-4354-AC9B-4F0A6224DE8C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E9088977-DF5A-49A6-ACF3-853484ADFDA7}"
 	ProjectSection(SolutionItems) = preProject
 		License.md = License.md
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceFabric.BackupRestore", "src\ServiceFabric.BackupRestore\ServiceFabric.BackupRestore.csproj", "{42BE1897-995D-4466-9E7C-7A3EC9035EF9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceFabric.BackupRestore.Tests", "test\ServiceFabric.BackupRestore.Tests\ServiceFabric.BackupRestore.Tests.csproj", "{6CD12A6A-6136-4354-AC9B-4F0A6224DE8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

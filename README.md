@@ -3,6 +3,10 @@ ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliab
 
 ## Change log
 
+- 2.0.0
+	- Upgraded sln to VS2017
+	- Upgraded nuget packages (SF 2.6.204)
+
 - 1.2.0
 	- Upgraded nuget packages (SF 2.5.216, JSON 10.0.1)
 
