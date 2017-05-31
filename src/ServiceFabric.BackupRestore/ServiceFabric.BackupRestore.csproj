@@ -4,8 +4,8 @@
     <Description>ServiceFabric.BackupRestore adds backup and restore features to your Reliable Stateful Services in Service Fabric. How to use this package: https://github.com/loekd/ServiceFabric.BackupRestore/blob/master/README.md</Description>
     <Copyright>2017</Copyright>
     <AssemblyTitle>ServiceFabric.BackupRestore</AssemblyTitle>
-    <VersionPrefix>1.2.0</VersionPrefix>
     <Authors>Loek Duys</Authors>
+    <Version>2.1.0</Version>
     <TargetFrameworks>net451;net46</TargetFrameworks>
     <PlatformTarget>x64</PlatformTarget>
     <AssemblyName>ServiceFabric.BackupRestore</AssemblyName>
@@ -20,10 +20,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <IncludeSymbols>True</IncludeSymbols>
-    <Version>2.0.0</Version>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
+    <IncludeSymbols>True</IncludeSymbols>   
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,8 +30,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.ServiceFabric.Services" Version="2.6.204" />
-    <PackageReference Include="Microsoft.ServiceFabric.Actors" Version="2.6.204" />
+    <PackageReference Include="Microsoft.ServiceFabric.Services" Version="2.6.210" />
+    <PackageReference Include="Microsoft.ServiceFabric.Actors" Version="2.6.210" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
   </ItemGroup>
 
