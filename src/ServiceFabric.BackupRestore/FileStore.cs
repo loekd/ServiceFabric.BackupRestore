@@ -27,10 +27,15 @@ namespace ServiceFabric.BackupRestore
 		/// </summary>
 		public const string BackupMetadataFileName = "backup.metadata";
 
-		/// <summary>
-		/// The name of a file that contains ServiceFabric related metadata about an incremental backup.
-		/// </summary>
-		public const string IncrementalBackupMetadataFileName = "incremental.metadata"; 
+        /// <summary>
+        /// The name of a file that contains ServiceFabric related metadata about a actor backup
+        /// </summary>
+	    public const string ActorBackupMetadataFileName = "restore.dat";
+
+        /// <summary>
+        /// The name of a file that contains ServiceFabric related metadata about an incremental backup.
+        /// </summary>
+        public const string IncrementalBackupMetadataFileName = "incremental.metadata"; 
 
 		/// <summary>
 		/// Creates a new instance.
@@ -138,7 +143,8 @@ namespace ServiceFabric.BackupRestore
 					let dirParentInfo = dirInfo.Parent
 					let metadata = BackupMetadataFromDirectory(d)
 					where (File.Exists(Path.Combine(d, BackupMetadataFileName))				//find folders with a SF metadata file
-							|| File.Exists(Path.Combine(d, IncrementalBackupMetadataFileName)))
+					        || File.Exists(Path.Combine(d, ActorBackupMetadataFileName))
+                            || File.Exists(Path.Combine(d, IncrementalBackupMetadataFileName)))
 						  && (backupId == null || metadata?.BackupId == backupId.Value)     //and optionally with the provided backup id
 						  && (servicePartitionId == null || metadata?.OriginalServicePartitionId == servicePartitionId.Value)     //and optionally with the servicePartitionId
 					orderby dirInfo.Parent?.Name, dirInfo.Name
