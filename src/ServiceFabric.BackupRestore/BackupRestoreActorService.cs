@@ -63,8 +63,14 @@ namespace ServiceFabric.BackupRestore
 			return BackupRestoreServiceInternalExtensions.ListBackups(this);
 		}
 
-		/// <inheritdoc />
-		protected override Task<bool> OnDataLossAsync(RestoreContext restoreCtx, CancellationToken cancellationToken)
+        /// <inheritdoc />
+		public Task<IEnumerable<BackupMetadata>> ListAllBackups()
+        {
+            return BackupRestoreServiceInternalExtensions.ListAllBackups(this);
+        }
+
+        /// <inheritdoc />
+        protected override Task<bool> OnDataLossAsync(RestoreContext restoreCtx, CancellationToken cancellationToken)
 		{
 			return BackupRestoreServiceInternalExtensions.OnDataLossAsync(this, restoreCtx, cancellationToken);
 		}

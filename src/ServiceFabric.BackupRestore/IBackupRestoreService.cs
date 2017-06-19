@@ -21,10 +21,19 @@ namespace ServiceFabric.BackupRestore
 		/// <returns></returns>
 		Task BeginRestoreBackup(BackupMetadata backupMetadata, DataLossMode dataLossMode);
 
-		/// <summary>
-		/// Lists all centrally stored backups.
-		/// </summary>
-		/// <returns></returns>
-		Task<IEnumerable<BackupMetadata>> ListBackups();
-	}
+        /// <summary>
+        /// Lists all centrally stored backups for the service <paramref name="service"/>.
+        /// </summary>
+        /// <param name="service"></param>
+        /// <returns></returns>
+        Task<IEnumerable<BackupMetadata>> ListBackups();
+
+        /// <summary>
+        /// Lists all centrally stored backups present in <paramref name="service"/> CentralBackupStore.
+        /// </summary>
+        /// <param name="service"></param>
+        /// <returns></returns>
+		Task<IEnumerable<BackupMetadata>> ListAllBackups();
+        
+    }
 }

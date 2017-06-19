@@ -10,125 +10,183 @@ using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace ServiceFabric.BackupRestore
 {
-	internal static class BackupRestoreServiceInternalExtensions
-	{
-		/// <summary>
-		/// Asynchronously starts the creation of a backup of the state of this replica and stores that into the central store.
-		/// </summary>
-		/// <param name="service"></param>
-		/// <param name="backupOption"></param>
-		/// <returns></returns>
-		public static async Task BeginCreateBackup(this IBackupRestoreServiceInternal service, BackupOption backupOption)
-		{
-			var backupDescription = new BackupDescription(backupOption, service.PostBackupCallbackAsync);
-			await service.BackupAsync(backupDescription);
+    internal static class BackupRestoreServiceInternalExtensions
+    {
+        /// <summary>
+        /// Asynchronously starts the creation of a backup of the state of this replica and stores that into the central store.
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="backupOption"></param>
+        /// <returns></returns>
+        public static async Task BeginCreateBackup(this IBackupRestoreServiceInternal service, BackupOption backupOption)
+        {
+            var backupDescription = new BackupDescription(backupOption, service.PostBackupCallbackAsync);
+            await service.BackupAsync(backupDescription);
 
-			service.LogCallback?.Invoke($"BackupRestoreService - BeginCreateBackup for partition {service.Context.PartitionId}.");
-		}
+            service.LogCallback?.Invoke($"BackupRestoreService - BeginCreateBackup for partition {service.Context.PartitionId}.");
+        }
 
-		/// <summary>
-		/// Asynchronously starts a restore operation using the state indicated by <paramref name="backupMetadata"/>. 
-		/// The backup is retrieved from the central store.
-		/// </summary>
-		/// <param name="service"></param>
-		/// <param name="dataLossMode"></param>
-		/// <param name="backupMetadata"></param>
-		/// <returns></returns>
-		public static async Task BeginRestoreBackup(this IBackupRestoreServiceInternal service, BackupMetadata backupMetadata, DataLossMode dataLossMode)
-		{
-			service.LogCallback?.Invoke($"BackupRestoreService - Beginning restore backup {backupMetadata.BackupId} for partition {service.Context.PartitionId}.");
+        /// <summary>
+        /// Asynchronously starts a restore operation using the state indicated by <paramref name="backupMetadata"/>. 
+        /// The backup is retrieved from the central store.
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="dataLossMode"></param>
+        /// <param name="backupMetadata"></param>
+        /// <returns></returns>
+        public static async Task BeginRestoreBackup(this IBackupRestoreServiceInternal service, BackupMetadata backupMetadata, DataLossMode dataLossMode)
+        {
+            service.LogCallback?.Invoke($"BackupRestoreService - Beginning restore backup {backupMetadata.BackupId} for partition {service.Context.PartitionId}.");
 
-			if (backupMetadata == null) throw new ArgumentNullException(nameof(backupMetadata));
+            if (backupMetadata == null) throw new ArgumentNullException(nameof(backupMetadata));
 
-			await service.CentralBackupStore.ScheduleBackupAsync(service.Context.PartitionId, backupMetadata.BackupId);
+            await service.CentralBackupStore.ScheduleBackupAsync(service.Context.PartitionId, backupMetadata.BackupId);
 
-			var partitionSelector = PartitionSelector.PartitionIdOf(service.Context.ServiceName, service.Context.PartitionId);
+            var partitionSelector = PartitionSelector.PartitionIdOf(service.Context.ServiceName, service.Context.PartitionId);
 
-			var operationId = Guid.NewGuid();
-			await new FabricClient(FabricClientRole.Admin).TestManager.StartPartitionDataLossAsync(operationId, partitionSelector, dataLossMode);
-			//Causes OnDataLossAsync to be called.
+            var operationId = Guid.NewGuid();
+            await new FabricClient(FabricClientRole.Admin).TestManager.StartPartitionDataLossAsync(operationId, partitionSelector, dataLossMode);
+            //Causes OnDataLossAsync to be called.
 
-			service.LogCallback?.Invoke($"BackupRestoreService - Begun restore backup {backupMetadata.BackupId} for partition {service.Context.PartitionId}.");
-		}
+            service.LogCallback?.Invoke($"BackupRestoreService - Begun restore backup {backupMetadata.BackupId} for partition {service.Context.PartitionId}.");
+        }
 
-		/// <summary>
-		/// Lists all centrally stored backups.
-		/// </summary>
-		/// <param name="service"></param>
-		/// <returns></returns>
-		public static async Task<IEnumerable<BackupMetadata>> ListBackups(this IBackupRestoreServiceInternal service)
-		{
-			service.LogCallback?.Invoke($"BackupRestoreService - Listing backups");
-			var backups = (await service.CentralBackupStore.GetBackupMetadataAsync()).ToList();
-			service.LogCallback?.Invoke($"BackupRestoreService - Returning {backups.Count} backups");
+        /// <summary>
+        /// Lists all centrally stored backups for the service <paramref name="service"/>.
+        /// </summary>
+        /// <param name="service"></param>
+        /// <returns></returns>
+        public static async Task<IEnumerable<BackupMetadata>> ListBackups(this IBackupRestoreServiceInternal service)
+        {
+            service.LogCallback?.Invoke($"BackupRestoreService - Listing backups");
+            var backups = (await service.CentralBackupStore.GetBackupMetadataAsync(servicePartitionId: service.Context.PartitionId))
+                .OrderByDescending(x => x.TimeStampUtc)
+                .ToList();
+            service.LogCallback?.Invoke($"BackupRestoreService - Returning {backups.Count} backups");
 
-			return backups;
-		}
+            return backups;
+        }
 
-		/// <summary>
-		/// Called after the call to <see cref="StatefulServiceBase.BackupAsync(Microsoft.ServiceFabric.Data.BackupDescription)"/> has completed. Used
-		/// to save a copy of that backup in the central store.
-		/// </summary>
-		/// <param name="service"></param>
-		/// <param name="backupInfo"></param>
-		/// <param name="cancellationToken"></param>
-		/// <returns></returns>
-		public static async Task<bool> PostBackupCallbackAsync(this IBackupRestoreServiceInternal service, BackupInfo backupInfo, CancellationToken cancellationToken)
-		{
-			service.LogCallback?.Invoke($"BackupRestoreService - performing PostBackupCallbackAsync'.");
-			var metadata = await service.CentralBackupStore.UploadBackupFolderAsync(backupInfo.Option, service.Context.PartitionId,
-				backupInfo.Directory, cancellationToken);
-			service.LogCallback?.Invoke($"BackupRestoreService - performed PostBackupCallbackAsync backupID:'{metadata.BackupId}'.");
+        /// <summary>
+        /// Lists all centrally stored backups present in <paramref name="service"/> CentralBackupStore.
+        /// </summary>
+        /// <param name="service"></param>
+        /// <returns></returns>
+        public static async Task<IEnumerable<BackupMetadata>> ListAllBackups(this IBackupRestoreServiceInternal service)
+        {
+            service.LogCallback?.Invoke($"BackupRestoreService - Listing backups");
+            var backups = (await service.CentralBackupStore.GetBackupMetadataAsync())
+                .OrderByDescending(x => x.TimeStampUtc)
+                .ToList();
+            service.LogCallback?.Invoke($"BackupRestoreService - Returning {backups.Count} backups");
 
-			return true;
-		}
+            return backups;
+        }
 
-		/// <summary>
-		/// This method is called during suspected data loss.
-		/// You can use this method to restore the service in case of data loss.
-		/// </summary>
-		/// <param name="service"></param>
-		/// <param name="restoreCtx"></param>
-		/// <param name="cancellationToken"></param>
-		/// <returns></returns>
-		public static async Task<bool> OnDataLossAsync(this IBackupRestoreServiceInternal service, RestoreContext restoreCtx, CancellationToken cancellationToken)
-		{
-			//caused by BeginRestoreBackup
-			service.LogCallback?.Invoke($"BackupRestoreService - OnDataLossAsync starting for partition: {service.Context.PartitionId}.");
+        /// <summary>
+        /// Called after the call to <see cref="StatefulServiceBase.BackupAsync(Microsoft.ServiceFabric.Data.BackupDescription)"/> has completed. Used
+        /// to save a copy of that backup in the central store.
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="backupInfo"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static async Task<bool> PostBackupCallbackAsync(this IBackupRestoreServiceInternal service, BackupInfo backupInfo, CancellationToken cancellationToken)
+        {
+            service.LogCallback?.Invoke($"BackupRestoreService - performing PostBackupCallbackAsync'.");
+            var metadata = await service.CentralBackupStore.UploadBackupFolderAsync(backupInfo.Option, service.Context.PartitionId,
+                backupInfo.Directory, cancellationToken);
+            service.LogCallback?.Invoke($"BackupRestoreService - performed PostBackupCallbackAsync backupID:'{metadata.BackupId}'.");
 
-			var metadata = await service.CentralBackupStore.RetrieveScheduledBackupAsync(service.Context.PartitionId);
-			if (metadata == null) return false;
+            return true;
+        }
 
-			var backupList = (await service.CentralBackupStore.GetBackupMetadataAsync(null, metadata.OriginalServicePartitionId))
-				.OrderBy(x => x.TimeStampUtc)
-				.ToList();
+        /// <summary>
+        /// This method is called during suspected data loss.
+        /// You can use this method to restore the service in case of data loss.
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="restoreCtx"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static async Task<bool> OnDataLossAsync(this IBackupRestoreServiceInternal service, RestoreContext restoreCtx, CancellationToken cancellationToken)
+        {
+            //caused by BeginRestoreBackup
+            service.LogCallback?.Invoke($"BackupRestoreService - OnDataLossAsync starting for partition: {service.Context.PartitionId}.");
 
-			if (metadata.BackupOption == BackupOption.Full)
-				// Taking only selected full backup
-				backupList = new[] { metadata }.ToList();
-			else
-			{
-				// Looking for the latest full backup before selected
-				var nearestFullBackup = backupList.LastOrDefault(md => md.BackupOption == BackupOption.Full && md.TimeStampUtc < metadata.TimeStampUtc);
-				if (nearestFullBackup == null)
-					throw new Exception($"Full backup not found for partition {service.Context.PartitionId}");
-				// Taking backups between selected and nearest fullbackup
-				backupList = backupList.Where(md => md.TimeStampUtc >= nearestFullBackup.TimeStampUtc && md.TimeStampUtc <= metadata.TimeStampUtc).ToList();
-			}
+            var metadata = await service.CentralBackupStore.RetrieveScheduledBackupAsync(service.Context.PartitionId);
+            if (metadata == null) return false;
 
-			string localBackupFolder = Path.Combine(service.Context.CodePackageActivationContext.WorkDirectory, Guid.NewGuid().ToString("N"));
-			foreach (var backupMetadata in backupList)
-			{
-				string subFolder = Path.Combine(localBackupFolder, backupMetadata.TimeStampUtc.ToString("yyyyMMddhhmmss"));
-				await service.CentralBackupStore.DownloadBackupFolderAsync(backupMetadata.BackupId, subFolder, cancellationToken);
-			}
-			var restoreDescription = new RestoreDescription(localBackupFolder, RestorePolicy.Force);
-			await restoreCtx.RestoreAsync(restoreDescription, cancellationToken);
+            List<BackupMetadata> backupList = await GetBackupMetadataAsync(service, metadata);
 
-			Directory.Delete(localBackupFolder, true);
-			service.LogCallback?.Invoke($"BackupRestoreService - OnDataLossAsync complete for partition {service.Context.PartitionId}.");
+            if (backupList.Count == 0)
+                throw new InvalidOperationException("Failed to find any backups for this partition.");
+            if (backupList[0].BackupOption != BackupOption.Full)
+                throw new InvalidOperationException("Failed to find any full backups for this partition.");
 
-			return true;
-		}
-	}
+            string localBackupFolder = Path.Combine(service.Context.CodePackageActivationContext.WorkDirectory, Guid.NewGuid().ToString("N"));
+            foreach (var backupMetadata in backupList)
+            {
+                string subFolder = Path.Combine(localBackupFolder, backupMetadata.TimeStampUtc.ToString("yyyyMMddhhmmss"));
+                await service.CentralBackupStore.DownloadBackupFolderAsync(backupMetadata.BackupId, subFolder, cancellationToken);
+            }
+            var restoreDescription = new RestoreDescription(localBackupFolder, RestorePolicy.Force);
+            await restoreCtx.RestoreAsync(restoreDescription, cancellationToken);
+
+            Directory.Delete(localBackupFolder, true);
+            service.LogCallback?.Invoke($"BackupRestoreService - OnDataLossAsync complete for partition {service.Context.PartitionId}.");
+
+            return true;
+        }
+
+        /// <summary>
+        /// Compiles a list of <see cref="BackupMetadata"/> to be restored, based on the provided metadata.
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="metadata"></param>
+        /// <returns></returns>
+        internal static async Task<List<BackupMetadata>> GetBackupMetadataAsync(IBackupRestoreServiceInternal service, BackupMetadata metadata)
+        {
+            var backupList = new List<BackupMetadata>();
+
+            if (metadata.BackupOption == BackupOption.Full)
+            {
+                // Taking only selected full backup
+                backupList.Add(metadata);
+            }
+            else
+            {
+                // Taking full backup and all incremental backups since, reversed
+                // so it finds the incremental backup first, and then loops until the full backup is found.
+                var allBackups = (await service.CentralBackupStore.GetBackupMetadataAsync(servicePartitionId: metadata.OriginalServicePartitionId))
+                   .OrderByDescending(x => x.TimeStampUtc)
+                   .ToList();
+
+                BackupMetadata incrementalBackup = null;
+                // Looking for the latest full backup before selected
+                foreach (var backupMetadata in allBackups)
+                {
+                    if (incrementalBackup == null && backupMetadata.BackupId != metadata.BackupId)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        incrementalBackup = backupMetadata;
+                        backupList.Add(backupMetadata);
+                    }
+
+                    if (backupMetadata.BackupOption == BackupOption.Full)
+                    {
+
+                        //if it's the full backup we encounter, we're done
+                        break;
+                    }
+                }
+                backupList.Reverse();
+            }
+           
+            return backupList;
+        }
+    }
 }

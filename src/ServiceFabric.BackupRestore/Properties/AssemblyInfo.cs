@@ -19,3 +19,4 @@ using System.Runtime.InteropServices;
 [assembly: Guid("42be1897-995d-4466-9e7c-7a3ec9035ef9")]
 
 [assembly: InternalsVisibleTo("ServiceFabric.BackupRestore.Tests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
