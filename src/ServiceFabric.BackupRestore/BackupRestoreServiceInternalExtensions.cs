@@ -99,8 +99,22 @@ namespace ServiceFabric.BackupRestore
 			var metadata = await service.CentralBackupStore.RetrieveScheduledBackupAsync(service.Context.PartitionId);
 			if (metadata == null) return false;
 
-			var backupList = (await service.CentralBackupStore.GetBackupMetadataAsync(null, metadata.OriginalServicePartitionId)).ToList()
-				.Where(md => md.BackupOption == BackupOption.Full || md.TimeStampUtc >= metadata.TimeStampUtc);
+			var backupList = (await service.CentralBackupStore.GetBackupMetadataAsync(null, metadata.OriginalServicePartitionId))
+				.OrderBy(x => x.TimeStampUtc)
+				.ToList();
+
+			if (metadata.BackupOption == BackupOption.Full)
+				// Taking only selected full backup
+				backupList = new[] { metadata }.ToList();
+			else
+			{
+				// Looking for the latest full backup before selected
+				var nearestFullBackup = backupList.LastOrDefault(md => md.BackupOption == BackupOption.Full && md.TimeStampUtc < metadata.TimeStampUtc);
+				if (nearestFullBackup == null)
+					throw new Exception($"Full backup not found for partition {service.Context.PartitionId}");
+				// Taking backups between selected and nearest fullbackup
+				backupList = backupList.Where(md => md.TimeStampUtc >= nearestFullBackup.TimeStampUtc && md.TimeStampUtc <= metadata.TimeStampUtc).ToList();
+			}
 
 			string localBackupFolder = Path.Combine(service.Context.CodePackageActivationContext.WorkDirectory, Guid.NewGuid().ToString("N"));
 			foreach (var backupMetadata in backupList)
