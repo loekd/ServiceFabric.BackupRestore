@@ -3,6 +3,9 @@ ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliab
 
 ## Change log
 
+- 2.3.0
+	- Upgraded nuget packages (SF 2.6.220)
+
 - 2.2.0
 	- Merged PR by bitTobiasMeier to fix issue in Actor backups
 	- Merged PR by ypom to fix issue with multiple full backups
