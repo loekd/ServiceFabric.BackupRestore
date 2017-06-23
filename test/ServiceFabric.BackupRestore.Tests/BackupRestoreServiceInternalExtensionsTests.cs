@@ -157,13 +157,6 @@ namespace ServiceFabric.BackupRestore.Tests
             Assert.AreEqual(backupMetadataTwo, result[0]);
             Assert.AreEqual(incrementalMetadataThree, result[1]);
             Assert.AreEqual(incrementalMetadataFour, result[2]);
-        }
-
-        public void DeleteMeAfterDatalossIssueIsResolved()
-        {
-            Assert.Fail("Block release of nuget package.");
-        }
+        }        
     }
-   
-
 }

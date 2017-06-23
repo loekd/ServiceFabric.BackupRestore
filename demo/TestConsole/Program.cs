@@ -60,7 +60,8 @@ namespace TestConsole
 				Console.WriteLine("Press 4 to restore a backup");
 				Console.WriteLine("Press 5 to list all central backups");
 				Console.WriteLine("Press 6 to list the current Service Partition Ids");
-				Console.WriteLine("Other key to exit");
+				Console.WriteLine("Press 7 to invoke full dataloss on one of the current Service's Partitions");
+                Console.WriteLine("Other key to exit");
 
 				var key = Console.ReadKey(true);
 				string input;
@@ -112,7 +113,7 @@ namespace TestConsole
 						Console.WriteLine($"Enter central backup id (guid):");
 						input = Console.ReadLine();
 
-						var backups = (await proxy.ListBackups()).ToList();
+						var backups = (await proxy.ListAllBackups()).ToList();
 						Guid index;
 						if (Guid.TryParse(input, out index))
 						{
@@ -137,9 +138,9 @@ namespace TestConsole
 						break;
 					case ConsoleKey.D5:
 						Console.WriteLine($"List all central backups");
-						var list = await proxy.ListBackups();
-						Console.WriteLine($"Original partition\t\t\tBackup Id\t\t\t\tBackup Type");
-						Console.WriteLine(string.Join(Environment.NewLine, list.Select(data => $"{data.OriginalServicePartitionId}\t{data.BackupId}\t{data.BackupOption}")));
+						var list = await proxy.ListAllBackups();
+						Console.WriteLine($"Original partition\t\t\tBackup Id\t\t\t\tBackup Type\tTimestamp UTC");
+						Console.WriteLine(string.Join(Environment.NewLine, list.Select(data => $"{data.OriginalServicePartitionId}\t{data.BackupId}\t{data.BackupOption}\t\t{data.TimeStampUtc}")));
 						break;
 
 					case ConsoleKey.D6:
@@ -158,6 +159,15 @@ namespace TestConsole
 							Console.WriteLine("Using partition two (1L)");
 						}
 						break;
+                    case ConsoleKey.D7:
+                        Console.WriteLine("Enter partitionID");
+                        string partitionString = Console.ReadLine();
+                        if (Guid.TryParse(partitionString, out Guid partitionID))
+                        {
+                            var partitionSelector = PartitionSelector.PartitionIdOf(ServiceUri, partitionID);
+                            await new FabricClient(FabricClientRole.Admin).TestManager.StartPartitionDataLossAsync(Guid.NewGuid(), partitionSelector, DataLossMode.FullDataLoss);
+                        }
+                        break;
 					default:
 						return;
 				}
