@@ -89,7 +89,7 @@ namespace ServiceFabric.BackupRestore.Tests
         [TestMethod]
         public async Task TestUploadBackupFolderAsync()
         {
-            if (!(await CanOperateAsync()))
+            if (!CanOperate())
             {
                 Assert.Inconclusive("Can't run at this machine!");
             }
@@ -135,7 +135,7 @@ namespace ServiceFabric.BackupRestore.Tests
         [TestMethod]
         public async Task TestDownloadBackupFolderAsync()
         {
-            if (!(await CanOperateAsync()))
+            if (!CanOperate())
             {
                 Assert.Inconclusive("Can't run at this machine!");
             }
@@ -174,18 +174,16 @@ namespace ServiceFabric.BackupRestore.Tests
             Assert.AreEqual(content, File.ReadAllText(Path.Combine(Local, subFolderName, testTxt)));
         }
 
-        private async Task<bool> CanOperateAsync()
+        private bool CanOperate()
         {
             try
             {
-                var store = new BlobStore("UseDevelopmentStorage=true", ContainerName);
-                await store.InitializeAsync();
+                return Directory.Exists(@"C:\Program Files (x86)\Microsoft SDKs\Azure\Storage Emulator");
             }
             catch
             {
                 return false;
             }
-            return true;
         }
     }
 }
