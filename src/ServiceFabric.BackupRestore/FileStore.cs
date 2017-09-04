@@ -89,12 +89,19 @@ namespace ServiceFabric.BackupRestore
 			var metadata = await GetBackupMetadataPrivateAsync(backupId, servicePartitionId);
 			return metadata.Select(m => new BackupMetadata(m.OriginalServicePartitionId, m.TimeStampUtc, m.BackupOption, m.BackupId));
 		}
-		
-		/// <inheritdoc />
-		public Task ScheduleBackupAsync(Guid servicePartitionId, Guid backupId)
-		{
-			//remember which backup to restore for which partition
-			string queueFile = GetQueueFile(servicePartitionId);
+
+        /// <inheritdoc />
+        [Obsolete("Naming issue. Call 'ScheduleBackupRestoreAsync'.")]
+        public Task ScheduleBackupAsync(Guid servicePartitionId, Guid backupId)
+        {
+            return ScheduleBackupRestoreAsync(servicePartitionId, backupId);
+        }
+
+        /// <inheritdoc />
+        public Task ScheduleBackupRestoreAsync(Guid servicePartitionId, Guid backupId)
+        {
+            //remember which backup to restore for which partition
+            string queueFile = GetQueueFile(servicePartitionId);
 			File.WriteAllText(queueFile, backupId.ToString("N"));
 			return Task.FromResult(true);
 		}
@@ -118,7 +125,7 @@ namespace ServiceFabric.BackupRestore
 		}
 
 		/// <inheritdoc />
-		public Task StoreBackupMetadataAsync(string destinationFolder, BackupMetadata info)
+		public Task StoreBackupMetadataAsync(string destinationFolder, BackupMetadata info, CancellationToken cancellationToken = default(CancellationToken))
 		{
 			return Task.Run(() =>
 			{

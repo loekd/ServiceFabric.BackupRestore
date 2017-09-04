@@ -14,7 +14,7 @@ namespace ServiceFabric.BackupRestore
 	/// Call <see cref="BeginCreateBackup"/> to start a backup creation asynchronously.
 	/// Call <see cref="BeginRestoreBackup"/> to start a restore operation asynchronously.
 	/// </summary>
-	public abstract class BackupRestoreService : StatefulService, IBackupRestoreService, IBackupRestoreServiceInternal
+	public abstract class BackupRestoreService : StatefulService, IBackupRestoreService, IBackupRestoreServiceOperations
 	{
 		private readonly ICentralBackupStore _centralBackupStore;
 		private readonly Action<string> _logCallback;
@@ -59,44 +59,44 @@ namespace ServiceFabric.BackupRestore
 		/// <inheritdoc />
 		public Task BeginCreateBackup(BackupOption backupOption)
 		{
-			return BackupRestoreServiceInternalExtensions.BeginCreateBackup(this, backupOption);
+			return BackupRestoreServiceOperations.BeginCreateBackup(this, backupOption);
 		}
 
 		/// <inheritdoc />
 		public Task BeginRestoreBackup(BackupMetadata backupMetadata, DataLossMode dataLossMode)
 		{
-			return BackupRestoreServiceInternalExtensions.BeginRestoreBackup(this, backupMetadata, dataLossMode);
+			return BackupRestoreServiceOperations.BeginRestoreBackup(this, backupMetadata, dataLossMode);
 		}
 
 		/// <inheritdoc />
 		public Task<IEnumerable<BackupMetadata>> ListBackups()
 		{
-			return BackupRestoreServiceInternalExtensions.ListBackups(this);
+			return BackupRestoreServiceOperations.ListBackups(this);
 		}
 
         /// <inheritdoc />
         public Task<IEnumerable<BackupMetadata>> ListAllBackups()
         {
-            return BackupRestoreServiceInternalExtensions.ListAllBackups(this);
+            return BackupRestoreServiceOperations.ListAllBackups(this);
         }
 
         /// <inheritdoc />
         protected override Task<bool> OnDataLossAsync(RestoreContext restoreCtx, CancellationToken cancellationToken)
 		{
-			return BackupRestoreServiceInternalExtensions.OnDataLossAsync(this, restoreCtx, cancellationToken);
+			return BackupRestoreServiceOperations.OnDataLossAsync(this, restoreCtx, cancellationToken);
 		}
 		
 		/// <inheritdoc />
-		ICentralBackupStore IBackupRestoreServiceInternal.CentralBackupStore => _centralBackupStore;
+		ICentralBackupStore IBackupRestoreServiceOperations.CentralBackupStore => _centralBackupStore;
 
 		/// <inheritdoc />
-		Action<string> IBackupRestoreServiceInternal.LogCallback => _logCallback;
+		Action<string> IBackupRestoreServiceOperations.LogCallback => _logCallback;
 
 		/// <inheritdoc />
-		IStatefulServicePartition IBackupRestoreServiceInternal.Partition => Partition;
+		IStatefulServicePartition IBackupRestoreServiceOperations.Partition => Partition;
 
 		/// <inheritdoc />
-		Task<bool> IBackupRestoreServiceInternal.PostBackupCallbackAsync(BackupInfo backupInfo, CancellationToken cancellationToken)
+		Task<bool> IBackupRestoreServiceOperations.PostBackupCallbackAsync(BackupInfo backupInfo, CancellationToken cancellationToken)
 		{
 			return this.PostBackupCallbackAsync(backupInfo, cancellationToken);
 		}

@@ -22,12 +22,12 @@ namespace ServiceFabric.BackupRestore.Tests
             BackupMetadata backupMetadata = new BackupMetadata(partitionId, now, BackupOption.Full);
                            
             var mockBackupStoreObject = new Moq.Mock<ICentralBackupStore>();            
-            var mockServiceObject = new Moq.Mock<IBackupRestoreServiceInternal>();
+            var mockServiceObject = new Moq.Mock<IBackupRestoreServiceOperations>();
             mockServiceObject.Setup(service => service.CentralBackupStore).Returns(mockBackupStoreObject.Object);
             mockServiceObject.Setup(service => service.Context).Returns(Mocks.MockStatefulServiceContextFactory.Default);
 
             //act
-            var result = await BackupRestoreServiceInternalExtensions.GetBackupMetadataAsync(mockServiceObject.Object, backupMetadata);
+            var result = await BackupRestoreServiceOperations.GetBackupMetadataAsync(mockServiceObject.Object, backupMetadata);
 
             //assert
             Assert.AreEqual(1, result.Count);
@@ -55,12 +55,12 @@ namespace ServiceFabric.BackupRestore.Tests
                 .Setup(store => store.GetBackupMetadataAsync(null, It.IsAny<Guid>()))
                 .Returns(Task.FromResult<IEnumerable<BackupMetadata>>(new[] { backupMetadata, incrementalMetadata }));
                         
-            var mockServiceObject = new Moq.Mock<IBackupRestoreServiceInternal>();
+            var mockServiceObject = new Moq.Mock<IBackupRestoreServiceOperations>();
             mockServiceObject.Setup(service => service.CentralBackupStore).Returns(mockBackupStoreObject.Object);
             mockServiceObject.Setup(service => service.Context).Returns(Mocks.MockStatefulServiceContextFactory.Default);
 
             //act
-            var result = await BackupRestoreServiceInternalExtensions.GetBackupMetadataAsync(mockServiceObject.Object, incrementalMetadata);
+            var result = await BackupRestoreServiceOperations.GetBackupMetadataAsync(mockServiceObject.Object, incrementalMetadata);
 
             //assert
             Assert.AreEqual(2, result.Count);
@@ -88,12 +88,12 @@ namespace ServiceFabric.BackupRestore.Tests
                 .Setup(store => store.GetBackupMetadataAsync(null, It.IsAny<Guid>()))
                 .Returns(Task.FromResult<IEnumerable<BackupMetadata>>(new[] { backupMetadata, incrementalMetadata, incrementalMetadataTwo }));
 
-            var mockServiceObject = new Moq.Mock<IBackupRestoreServiceInternal>();
+            var mockServiceObject = new Moq.Mock<IBackupRestoreServiceOperations>();
             mockServiceObject.Setup(service => service.CentralBackupStore).Returns(mockBackupStoreObject.Object);
             mockServiceObject.Setup(service => service.Context).Returns(Mocks.MockStatefulServiceContextFactory.Default);
 
             //act
-            var result = await BackupRestoreServiceInternalExtensions.GetBackupMetadataAsync(mockServiceObject.Object, incrementalMetadataTwo);
+            var result = await BackupRestoreServiceOperations.GetBackupMetadataAsync(mockServiceObject.Object, incrementalMetadataTwo);
 
             //assert
             Assert.AreEqual(3, result.Count);
@@ -136,12 +136,12 @@ namespace ServiceFabric.BackupRestore.Tests
                     incrementalMetadataFour
                 }));
 
-            var mockServiceObject = new Moq.Mock<IBackupRestoreServiceInternal>();
+            var mockServiceObject = new Moq.Mock<IBackupRestoreServiceOperations>();
             mockServiceObject.Setup(service => service.CentralBackupStore).Returns(mockBackupStoreObject.Object);
             mockServiceObject.Setup(service => service.Context).Returns(Mocks.MockStatefulServiceContextFactory.Default);
 
             //act
-            var result = await BackupRestoreServiceInternalExtensions.GetBackupMetadataAsync(mockServiceObject.Object, incrementalMetadataTwo);
+            var result = await BackupRestoreServiceOperations.GetBackupMetadataAsync(mockServiceObject.Object, incrementalMetadataTwo);
 
             //assert
             Assert.AreEqual(3, result.Count);
@@ -150,7 +150,7 @@ namespace ServiceFabric.BackupRestore.Tests
             Assert.AreEqual(incrementalMetadataTwo, result[2]);
 
             //act
-            result = await BackupRestoreServiceInternalExtensions.GetBackupMetadataAsync(mockServiceObject.Object, incrementalMetadataFour);
+            result = await BackupRestoreServiceOperations.GetBackupMetadataAsync(mockServiceObject.Object, incrementalMetadataFour);
 
             //assert
             Assert.AreEqual(3, result.Count);
