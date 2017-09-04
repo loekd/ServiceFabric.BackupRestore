@@ -1,7 +1,12 @@
 # ServiceFabric.BackupRestore
 ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliable Stateful Service replicas. Store your backups safely outside of the cluster by using / implementing ICentralBackupStore.
+Just implement an interface!
 
 ## Change log
+
+- 3.0.0
+	- Added BlobStore that saves backup data in an Azure Storage Account
+	- No longer needed to inherit Stateful Services, just implement one or two interfaces. (added sample code below)
 
 - 2.3.1 
 	- Upgraded nuget packages (SF 2.7.198)
@@ -47,49 +52,120 @@ Change this line https://github.com/loekd/ServiceFabric.BackupRestore/blob/maste
 ## Enable your Stateful Service for Backup & Restore:
 
 1. Add the nuget package https://www.nuget.org/packages/ServiceFabric.BackupRestore/
-2. Have your Stateful Service inherit from ```BackupRestoreService```
+2. Have your Stateful Service inherit from ```IBackupRestoreServiceOperations``` 
+ Inject an instance of a type that implements `ICentralBackupStore`, for example `IBlobStore` or `IFileStore`. You can also implement your own types.
+ To implement ```IBackupRestoreServiceOperations```, delegate most of the work to `BackupRestoreServiceOperations`.
 
   ``` csharp
-  internal sealed class MyStatefulService : BackupRestoreService, IMyStatefulService
+  internal sealed class MyStatefulService : StatefulService, IBackupRestoreServiceOperations, IMyStatefulService
   {
-    public MyStatefulService(StatefulServiceContext context, ICentralBackupStore centralBackupStore, Action<string> logCallback) 
-			: base(context, centralBackupStore, logCallback)
+		public MyStatefulService(StatefulServiceContext context, ICentralBackupStore centralBackupStore, Action<string> logCallback) 
+				: base(context)
 		{
+			_centralBackupStore = centralBackupStore ?? throw new ArgumentNullException(nameof(centralBackupStore));
 		}
+
+		//////NOT IN INTERFACE:
+		
+		/// <inheritdoc />
+        protected sealed override Task<bool> OnDataLossAsync(RestoreContext restoreCtx, CancellationToken cancellationToken)
+        {
+            //after data loss, we'll restore a backup here:
+            return BackupRestoreServiceOperations.OnDataLossAsync(this, restoreCtx, cancellationToken);
+        }
+
+		
+		/////IN INTERFACE: 
+
+		/// <inheritdoc />
+		ICentralBackupStore IBackupRestoreServiceOperations.CentralBackupStore => _centralBackupStore;
+
+        /// <inheritdoc />
+        Action<string> IBackupRestoreServiceOperations.LogCallback => _logCallback;
+
+        /// <inheritdoc />
+        IStatefulServicePartition IBackupRestoreServiceOperations.Partition => Partition;
+
+        /// <inheritdoc />
+        Task<bool> IBackupRestoreServiceOperations.PostBackupCallbackAsync(BackupInfo backupInfo, CancellationToken cancellationToken)
+        {
+            return this.PostBackupCallbackAsync(backupInfo, cancellationToken);
+        }
   }
   ```
-3. Change Program.Main to provide an implementation of ```ICentralBackupStore``` e.g. the ```FileStore```:
+3. Change Program.Main to provide an implementation of ```ICentralBackupStore``` e.g. the `BlobStore` or ```FileStore```:
 
 	``` csharp
   //Register the service with a FileStore.
   ServiceRuntime.RegisterServiceAsync("MyStatefulServiceType",
     context =>
-    {
-      string serviceName = context.ServiceName.AbsoluteUri.Replace(":", string.Empty).Replace("/", "-");
+    {       
+	  //Use the blob store, combined with an Azure Storage Account, or the Storage Emulator for testing.
+	  //see: https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator
+      var centralBackupStore = new BlobStore("UseDevelopmentStorage=true", serviceName);
+
+	  //Or the file store:
+	  string serviceName = context.ServiceName.AbsoluteUri.Replace(":", string.Empty).Replace("/", "-");
       string remoteFolderName = Path.Combine(@"E:\sfbackups", serviceName);
       //The E drive is a mapped network share to a File Server outside of the cluster here.
       //make sure the account running this service has R/W access to that location.
       var centralBackupStore = new FileStore(remoteFolderName);
+
 
       return new MyStatefulService(context, centralBackupStore, log => ServiceEventSource.Current.ServiceMessage(context, log));
 
     }).GetAwaiter().GetResult();
   ```  
    
-4. Enable communication with your service, for instance using SF Remoting
+4. Optionally, enable communication with your service, for instance using SF Remoting and the interface `IBackupRestoreService`.
+Again, delegate the most of the work of the operations, to `BackupRestoreServiceOperations`.
 
    ``` csharp
-   internal sealed class MyStatefulService : BackupRestoreService, IMyStatefulService
+   internal sealed class MyStatefulService : StatefulService, IBackupRestoreServiceOperations, IMyStatefulService, IBackupRestoreService
     {
-      [..]
-  	  protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
-		  {
-			  yield return new ServiceReplicaListener(this.CreateServiceRemotingListener, BackupRestoreServiceEndpointName);
-		  }
+		//////NOT IN INTERFACE:
+
+		[..]
+  		protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
+		{
+			//Enable interaction, to allow external callers to trigger backups and restores, by using Service Remoting through IBackupRestoreService
+			yield return new ServiceReplicaListener(this.CreateServiceRemotingListener, BackupRestoreService.BackupRestoreServiceEndpointName);
+		}
+
+
+
+		//////IN INTERFACE:
+
+		/// <inheritdoc />
+        Task IBackupRestoreService.BeginCreateBackup(BackupOption backupOption)
+        {
+            return BackupRestoreServiceOperations.BeginCreateBackup(this, backupOption);
+        }
+
+        /// <inheritdoc />
+        Task IBackupRestoreService.BeginRestoreBackup(BackupMetadata backupMetadata, DataLossMode dataLossMode)
+        {
+            return BackupRestoreServiceOperations.BeginRestoreBackup(this, backupMetadata, dataLossMode);
+        }
+
+        /// <inheritdoc />
+        Task<IEnumerable<BackupMetadata>> IBackupRestoreService.ListBackups()
+        {
+            return BackupRestoreServiceOperations.ListBackups(this);
+        }
+
+        /// <inheritdoc />
+        Task<IEnumerable<BackupMetadata>> IBackupRestoreService.ListAllBackups()
+        {
+            return BackupRestoreServiceOperations.ListAllBackups(this);
+        }
     }
   ```
+
+  5. You can also implement the required interfaces by inheriting from `ServiceFabric.BackupRestore.BackupRestoreService` or `ServiceFabric.BackupRestore.BackupRestoreActorService`.
+
   
-## Calling application
+## Optional calling application
 1. Create an application that calls your Service to perform Backup & Restore operations
 2. Add the nuget package to your calling application too:  https://www.nuget.org/packages/ServiceFabric.BackupRestore/
 3. Add a reference to the Stateful Service project
@@ -103,7 +179,7 @@ Change this line https://github.com/loekd/ServiceFabric.BackupRestore/blob/maste
  
   ``` csharp
   var proxy = ServiceProxy.Create<IMyStatefulService>(ServiceUri, servicePartitionKey);
-  var list = await proxy.ListBackups();
+  var list = await proxy.ListAllBackups();
 						Console.WriteLine($"Backup Id\t\t\t\tOriginal partition");
 						Console.WriteLine(string.Join(Environment.NewLine, list.Select(data => $"             {data.BackupId}\t{data.OriginalServicePartitionId}")));
   ```

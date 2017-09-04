@@ -27,22 +27,22 @@ namespace ServiceFabric.BackupRestore
 		/// </summary>
 		/// <param name="destinationFolder"></param>
 		/// <param name="info"></param>
-		Task StoreBackupMetadataAsync(string destinationFolder, BackupMetadata info);
+		Task StoreBackupMetadataAsync(string destinationFolder, BackupMetadata info, CancellationToken cancellationToken = default(CancellationToken));
 
 		/// <summary>
 		/// Copies contents from the last known backup folder to the provided <paramref name="destinationDirectory"/> on the node.
 		/// </summary>
-		/// <param name="backupInfoId"></param>
+		/// <param name="backupId"></param>
 		/// <param name="destinationDirectory"></param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		Task DownloadBackupFolderAsync(Guid backupInfoId, string destinationDirectory, CancellationToken cancellationToken);
+		Task DownloadBackupFolderAsync(Guid backupId, string destinationDirectory, CancellationToken cancellationToken);
 
 		/// <summary>
 		/// Lists all known backup metadata.
 		/// </summary>
 		/// <returns></returns>
-		Task<IEnumerable<BackupMetadata>> GetBackupMetadataAsync(Guid? backupInfoId = null, Guid? servicePartitionId = null);
+		Task<IEnumerable<BackupMetadata>> GetBackupMetadataAsync(Guid? backupId = null, Guid? servicePartitionId = null);
 
 		/// <summary>
 		/// Schedules a backup to be restored.
@@ -50,13 +50,22 @@ namespace ServiceFabric.BackupRestore
 		/// <param name="servicePartitionId"></param>
 		/// <param name="backupId"></param>
 		/// <returns></returns>
-		Task ScheduleBackupAsync(Guid servicePartitionId, Guid backupId);
+		[Obsolete("Naming issue. Call 'ScheduleBackupRestoreAsync'.")]
+        Task ScheduleBackupAsync(Guid servicePartitionId, Guid backupId);
 
-		/// <summary>
-		/// Returns the id of a scheduled backup to be restored, for the provided <paramref name="servicePartitionId"/> or null.
+        /// <summary>
+		/// Schedules a backup to be restored.
 		/// </summary>
 		/// <param name="servicePartitionId"></param>
-		/// <returns>backupId</returns>
-		Task<BackupMetadata> RetrieveScheduledBackupAsync(Guid servicePartitionId);
+		/// <param name="backupId"></param>
+		/// <returns></returns>
+        Task ScheduleBackupRestoreAsync(Guid servicePartitionId, Guid backupId);
+
+        /// <summary>
+        /// Returns the id of a scheduled backup to be restored, for the provided <paramref name="servicePartitionId"/> or null.
+        /// </summary>
+        /// <param name="servicePartitionId"></param>
+        /// <returns>backupId</returns>
+        Task<BackupMetadata> RetrieveScheduledBackupAsync(Guid servicePartitionId);
 	}
 }

@@ -6,7 +6,12 @@ using Microsoft.ServiceFabric.Data;
 
 namespace ServiceFabric.BackupRestore
 {
-	internal interface IBackupRestoreServiceInternal
+    /// <summary>
+    /// This interface must be implemented to perform backups and restores. 
+    /// Implement this service to enable calls to <see cref="BackupRestoreServiceOperations"/>
+    /// Sample implementation in <see cref="BackupRestoreService"/> and <see cref="BackupRestoreActorService"/>.
+    /// </summary>
+	public interface IBackupRestoreServiceOperations
 	{
 		/// <summary>
 		/// Gets the implementation of <see cref="ICentralBackupStore"/>
