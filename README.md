@@ -153,12 +153,15 @@ Again, delegate the most of the work of the operations, to `BackupRestoreService
             return BackupRestoreServiceOperations.ListAllBackups(this);
         }
     }
-  ```
+```
 
-  5. You can also implement the required interfaces by inheriting from `ServiceFabric.BackupRestore.BackupRestoreService` or `ServiceFabric.BackupRestore.BackupRestoreActorService`.
+### Inheritance is optional
+
+5. You can also implement the required interfaces by inheriting from `ServiceFabric.BackupRestore.BackupRestoreService` or `ServiceFabric.BackupRestore.BackupRestoreActorService`.
 
   
 ## Optional calling application
+
 1. Create an application that calls your Service to perform Backup & Restore operations
 2. Add the nuget package to your calling application too:  https://www.nuget.org/packages/ServiceFabric.BackupRestore/
 3. Add a reference to the Stateful Service project
