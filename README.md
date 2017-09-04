@@ -47,12 +47,12 @@ Just implement an interface!
 ## Demo
 Run the demo app on your local dev cluster, to see how it works.
 https://github.com/loekd/ServiceFabric.BackupRestore/tree/master/demo
-Change this line https://github.com/loekd/ServiceFabric.BackupRestore/blob/master/demo/MyStatefulService/Program.cs#L25 to point to a folder on your dev box.
+Change the code in https://github.com/loekd/ServiceFabric.BackupRestore/blob/master/demo/MyStatefulService/Program.cs use the Azure Blob based store, or the File System based store.
 
 ## Enable your Stateful Service for Backup & Restore:
 
 1. Add the nuget package https://www.nuget.org/packages/ServiceFabric.BackupRestore/
-2. Have your Stateful Service inherit from ```IBackupRestoreServiceOperations``` 
+2. Have your Stateful Service implement ```IBackupRestoreServiceOperations``` 
  Inject an instance of a type that implements `ICentralBackupStore`, for example `IBlobStore` or `IFileStore`. You can also implement your own types.
  To implement ```IBackupRestoreServiceOperations```, delegate most of the work to `BackupRestoreServiceOperations`.
 
@@ -93,31 +93,24 @@ Change this line https://github.com/loekd/ServiceFabric.BackupRestore/blob/maste
         }
   }
   ```
-3. Change Program.Main to provide an implementation of ```ICentralBackupStore``` e.g. the `BlobStore` or ```FileStore```:
+3. Change Program.Main to provide an implementation of ```ICentralBackupStore``` e.g. the `BlobStore` or `FileStore`:
 
-	``` csharp
-  //Register the service with a FileStore.
-  ServiceRuntime.RegisterServiceAsync("MyStatefulServiceType",
-    context =>
+``` csharp
+    ServiceRuntime.RegisterServiceAsync("MyStatefulServiceType", context =>
     {       
-	  //Use the blob store, combined with an Azure Storage Account, or the Storage Emulator for testing.
-	  //see: https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator
-      var centralBackupStore = new BlobStore("UseDevelopmentStorage=true", serviceName);
-
+          //Use the blob store, combined with an Azure Storage Account, or the Storage Emulator for testing.	 
+      	  var centralBackupStore = new BlobStore("UseDevelopmentStorage=true", serviceName);
 	  //Or the file store:
 	  string serviceName = context.ServiceName.AbsoluteUri.Replace(":", string.Empty).Replace("/", "-");
-      string remoteFolderName = Path.Combine(@"E:\sfbackups", serviceName);
-      //The E drive is a mapped network share to a File Server outside of the cluster here.
-      //make sure the account running this service has R/W access to that location.
-      var centralBackupStore = new FileStore(remoteFolderName);
-
-
-      return new MyStatefulService(context, centralBackupStore, log => ServiceEventSource.Current.ServiceMessage(context, log));
-
+          string remoteFolderName = Path.Combine(@"E:\sfbackups", serviceName);
+          //The E drive is a mapped network share to a File Server outside of the cluster here.
+          //make sure the account running this service has R/W access to that location.
+          var centralBackupStore = new FileStore(remoteFolderName);
+          return new MyStatefulService(context, centralBackupStore, log => ServiceEventSource.Current.ServiceMessage(context, log)); 
     }).GetAwaiter().GetResult();
-  ```  
+```  
    
-4. Optionally, enable communication with your service, for instance using SF Remoting and the interface `IBackupRestoreService`.
+4. Optionally, enable communication with your service, for instance using SF Remoting by implementing the interface `IBackupRestoreService`.
 Again, delegate the most of the work of the operations, to `BackupRestoreServiceOperations`.
 
    ``` csharp
