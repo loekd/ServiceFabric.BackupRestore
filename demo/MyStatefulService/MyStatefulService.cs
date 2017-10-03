@@ -9,6 +9,11 @@ using ServiceFabric.BackupRestore;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using System.Threading;
+using Microsoft.ServiceFabric.Services.Remoting;
+using Microsoft.ServiceFabric.Services.Remoting.FabricTransport;
+using Microsoft.ServiceFabric.Services.Remoting.V2.FabricTransport.Runtime;
+
+[assembly: FabricTransportServiceRemotingProvider(RemotingListener = RemotingListener.V2Listener, RemotingClient = RemotingClient.V2Client)]
 
 namespace MyStatefulService
 {
@@ -40,7 +45,7 @@ namespace MyStatefulService
         /// <param name="reliableStateManagerReplica"></param>
         /// <param name="centralBackupStore"></param>
         /// <param name="logCallback"></param>
-		public MyStatefulService(StatefulServiceContext context, IReliableStateManagerReplica reliableStateManagerReplica, ICentralBackupStore centralBackupStore, Action<string> logCallback) 
+		public MyStatefulService(StatefulServiceContext context, IReliableStateManagerReplica2 reliableStateManagerReplica, ICentralBackupStore centralBackupStore, Action<string> logCallback) 
 			: base(context, reliableStateManagerReplica)
 		{
             _centralBackupStore = centralBackupStore ?? throw new ArgumentNullException(nameof(centralBackupStore));
@@ -54,8 +59,11 @@ namespace MyStatefulService
 		protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
 		{
             //Enable interaction, to allow external callers to trigger backups and restores, by using Service Remoting through IBackupRestoreService
-            yield return new ServiceReplicaListener(this.CreateServiceRemotingListener, BackupRestoreService.BackupRestoreServiceEndpointName);
-		}
+            //yield return new ServiceReplicaListener(this.CreateServiceRemotingListener, BackupRestoreService.BackupRestoreServiceEndpointName);
+            //return this.CreateServiceRemotingReplicaListeners();
+		    yield return new ServiceReplicaListener(context => new FabricTransportServiceRemotingListener(context, this), BackupRestoreService.BackupRestoreServiceEndpointName);
+
+        }
 
         /// <summary>
         /// Call this to set some state. 
@@ -113,14 +121,14 @@ namespace MyStatefulService
         }
 
         /// <inheritdoc />
-        Task<IEnumerable<BackupMetadata>> IBackupRestoreService.ListBackups()
+        Task<List<BackupMetadata>> IBackupRestoreService.ListBackups()
         {
             return BackupRestoreServiceOperations.ListBackups(this);
 
         }
 
         /// <inheritdoc />
-        Task<IEnumerable<BackupMetadata>> IBackupRestoreService.ListAllBackups()
+        Task<List<BackupMetadata>> IBackupRestoreService.ListAllBackups()
         {
             return BackupRestoreServiceOperations.ListAllBackups(this);
         }

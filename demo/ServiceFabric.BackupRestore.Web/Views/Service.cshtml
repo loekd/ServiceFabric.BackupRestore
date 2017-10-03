@@ -1,0 +1,18 @@
+﻿@model BackupEnabledServiceReference
+@{
+	ViewData["Title"] = "View";
+}
+@{
+	ViewBag.Title = "title";
+	Layout = "_Layout";
+}
+
+<div>
+
+	<div>
+		<textarea asp-for="ApplicationName" class="col-md-3 disabled"></textarea>
+		<textarea asp-for="ServiceName" class="col-md-3 disabled"></textarea>
+		<textarea asp-for="Int64RangePartitionGuid" class="col-md-3 disabled"></textarea>
+		<textarea asp-for="Endpoint" class="col-md-3 disabled"></textarea>
+	</div>
+</div>

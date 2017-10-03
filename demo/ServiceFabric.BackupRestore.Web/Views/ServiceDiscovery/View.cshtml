@@ -1,0 +1,51 @@
+﻿@model List<BackupEnabledServiceReference>
+@{
+	ViewData["Title"] = "View";
+}
+<h2>Services that support Backup Restore</h2>
+
+<div class="container">
+	
+	<table class="table table-striped table-hover table-responsive">
+		<thead>
+		<tr>
+			<th>#</th>
+			<th>Application</th>
+			<th>Service</th>
+			<th>Partition</th>
+			<th>Endpoint</th>
+		</tr>
+		</thead>
+		<tbody>
+		@{
+			int i = 0;
+		}
+		@foreach (var serviceReference in Model)
+		{
+			<tr>
+				<th scope="row">@{ i++; }</th>
+				<td>@serviceReference.ApplicationName</td>
+				<td>@serviceReference.ServiceName</td>
+				<td>@serviceReference.Int64RangePartitionGuid</td>
+				<td>@serviceReference.Endpoint</td>
+				<td><input id="backup_@i" class="backup" type="button" value="Create backup"></td>
+				<td><input id="restore_@i" type="button" value="Restore backup" /></td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>
+
+
+<script language="ecmascript">
+	
+	$("backup").click(function () {
+		alert('click');
+		var tableData = $(this).children("td").map(function () {
+			return $(this).text();
+		}).get();
+
+		alert("Your data is: " + $.trim(tableData[0]) + " , " + $.trim(tableData[1]) + " , " + $.trim(tableData[2]));
+	});
+
+</script>

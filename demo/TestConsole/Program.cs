@@ -5,8 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Client;
+using Microsoft.ServiceFabric.Services.Communication.Client;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
 using MyStatefulService;
+using ServiceFabric.BackupRestore;
 
 namespace TestConsole
 {
@@ -183,7 +185,7 @@ namespace TestConsole
 				try
 				{
 					var servicePartitionKey = new ServicePartitionKey(partitionKey);
-					proxy = ServiceProxy.Create<IMyStatefulService>(ServiceUri, servicePartitionKey);
+					proxy = ServiceProxy.Create<IMyStatefulService>(ServiceUri, servicePartitionKey, TargetReplicaSelector.Default, BackupRestoreService.BackupRestoreServiceEndpointName);
 					var result = await proxy.ListBackups();
 					if (result != null)
 					{
