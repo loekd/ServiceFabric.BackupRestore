@@ -4,6 +4,9 @@ Just implement an interface!
 
 ## Change log
 
+- 3.1.0
+	- Upgraded nuget packages (SF 2.8.211)
+
 - 3.0.0
 	- Added BlobStore that saves backup data in an Azure Storage Account
 	- No longer needed to inherit Stateful Services, just implement one or two interfaces. (added sample code below)

@@ -33,9 +33,7 @@ namespace ServiceFabric.BackupRestore
 		protected BackupRestoreService(StatefulServiceContext context, ICentralBackupStore centralBackupStore, Action<string> logCallback)
 			: base(context)
 		{
-			if (centralBackupStore == null) throw new ArgumentNullException(nameof(centralBackupStore));
-
-			_centralBackupStore = centralBackupStore;
+		    _centralBackupStore = centralBackupStore ?? throw new ArgumentNullException(nameof(centralBackupStore));
 			_logCallback = logCallback;
 		}
 
@@ -46,12 +44,10 @@ namespace ServiceFabric.BackupRestore
 		/// <param name="reliableStateManagerReplica"></param>
 		/// <param name="centralBackupStore"></param>
 		/// <param name="logCallback"></param>
-		protected BackupRestoreService(StatefulServiceContext context, IReliableStateManagerReplica reliableStateManagerReplica, ICentralBackupStore centralBackupStore, Action<string> logCallback)
+		protected BackupRestoreService(StatefulServiceContext context, IReliableStateManagerReplica2 reliableStateManagerReplica, ICentralBackupStore centralBackupStore, Action<string> logCallback)
 			: base(context, reliableStateManagerReplica)
 		{
-			if (centralBackupStore == null) throw new ArgumentNullException(nameof(centralBackupStore));
-
-			_centralBackupStore = centralBackupStore;
+		    _centralBackupStore = centralBackupStore ?? throw new ArgumentNullException(nameof(centralBackupStore));
 			_logCallback = logCallback;
 		}
 
@@ -69,13 +65,13 @@ namespace ServiceFabric.BackupRestore
 		}
 
 		/// <inheritdoc />
-		public Task<IEnumerable<BackupMetadata>> ListBackups()
+		public Task<List<BackupMetadata>> ListBackups()
 		{
 			return BackupRestoreServiceOperations.ListBackups(this);
 		}
 
         /// <inheritdoc />
-        public Task<IEnumerable<BackupMetadata>> ListAllBackups()
+        public Task<List<BackupMetadata>> ListAllBackups()
         {
             return BackupRestoreServiceOperations.ListAllBackups(this);
         }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace ServiceFabric.BackupRestore
 {
@@ -76,7 +77,7 @@ namespace ServiceFabric.BackupRestore
         /// </summary>
         /// <param name="service"></param>
         /// <returns></returns>
-        public static async Task<IEnumerable<BackupMetadata>> ListBackups(this IBackupRestoreServiceOperations service)
+        public static async Task<List<BackupMetadata>> ListBackups(this IBackupRestoreServiceOperations service)
         {
             service.LogCallback?.Invoke($"{nameof(BackupRestoreServiceOperations)} - {nameof(ListBackups)} - Listing backups");
 
@@ -94,7 +95,7 @@ namespace ServiceFabric.BackupRestore
         /// </summary>
         /// <param name="service"></param>
         /// <returns></returns>
-        public static async Task<IEnumerable<BackupMetadata>> ListAllBackups(this IBackupRestoreServiceOperations service)
+        public static async Task<List<BackupMetadata>> ListAllBackups(this IBackupRestoreServiceOperations service)
         {
             service.LogCallback?.Invoke($"{nameof(BackupRestoreServiceOperations)} - {nameof(ListAllBackups)} - Listing all backups");
 
@@ -140,7 +141,7 @@ namespace ServiceFabric.BackupRestore
 
             //First, query the scheduled metadata for this partition backup
             service.LogCallback?.Invoke($"{nameof(BackupRestoreServiceOperations)} - {nameof(OnDataLossAsync)} - Starting for partition: {service.Context.PartitionId}.");
-            BackupMetadata metadata = null;
+            BackupMetadata metadata;
             try
             {
                 metadata = await service.CentralBackupStore.RetrieveScheduledBackupAsync(service.Context.PartitionId);
@@ -155,7 +156,7 @@ namespace ServiceFabric.BackupRestore
             if (metadata == null) return false;
 
             //Get all metadata for all backups related to this one, if it's an incremental one
-            List<BackupMetadata> backupList = null;
+            List<BackupMetadata> backupList;
 
             try
             {

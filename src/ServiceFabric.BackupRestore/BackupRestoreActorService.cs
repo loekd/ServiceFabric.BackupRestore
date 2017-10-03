@@ -39,9 +39,7 @@ namespace ServiceFabric.BackupRestore
 			ActorServiceSettings settings = null)
 			: base(context, actorTypeInfo, actorFactory, stateManagerFactory, stateProvider, settings)
 		{
-			if (centralBackupStore == null) throw new ArgumentNullException(nameof(centralBackupStore));
-
-			_centralBackupStore = centralBackupStore;
+		    _centralBackupStore = centralBackupStore ?? throw new ArgumentNullException(nameof(centralBackupStore));
 			_logCallback = logCallback;
 		}
 		
@@ -58,13 +56,13 @@ namespace ServiceFabric.BackupRestore
 		}
 
 		/// <inheritdoc />
-		public Task<IEnumerable<BackupMetadata>> ListBackups()
+		public Task<List<BackupMetadata>> ListBackups()
 		{
 			return BackupRestoreServiceOperations.ListBackups(this);
 		}
 
         /// <inheritdoc />
-		public Task<IEnumerable<BackupMetadata>> ListAllBackups()
+		public Task<List<BackupMetadata>> ListAllBackups()
         {
             return BackupRestoreServiceOperations.ListAllBackups(this);
         }
