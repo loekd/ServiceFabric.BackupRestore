@@ -158,9 +158,12 @@ Again, delegate the most of the work of the operations, to `BackupRestoreService
     }
 ```
 
+``` csharp
+```
+
 ### Inheritance is optional
 
-5. You can also implement the required interfaces by inheriting from `ServiceFabric.BackupRestore.BackupRestoreService` or `ServiceFabric.BackupRestore.BackupRestoreActorService`.
+You can also implement the required interfaces by inheriting from `ServiceFabric.BackupRestore.BackupRestoreService` or `ServiceFabric.BackupRestore.BackupRestoreActorService`.
 
   
 ## Optional calling application
