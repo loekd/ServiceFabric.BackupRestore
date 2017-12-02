@@ -3,6 +3,8 @@ ServiceFabric.BackupRestore simplifies creating and restoring backups for Reliab
 Just implement an interface!
 
 ## Change log
+- 3.1.1
+	- Upgraded nuget packages (SF 2.8.232)
 
 - 3.1.0
 	- Upgraded nuget packages (SF 2.8.211)
