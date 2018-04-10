@@ -20,7 +20,6 @@ namespace MyStatefulService
         {
             try
             {
-                
                 //Register the service with a FileStore.
                 ServiceRuntime.RegisterServiceAsync("MyStatefulServiceType",
                     context =>
