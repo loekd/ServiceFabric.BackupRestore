@@ -4,7 +4,7 @@ Just implement an interface!
 
 ## Change log
 - 3.1.3
-	- Upgraded nuget packages (SF 3.0.480)
+	- Upgraded nuget packages (SF 3.0.480) 
 
 - 3.1.1
 	- Upgraded nuget packages (SF 2.8.232)
