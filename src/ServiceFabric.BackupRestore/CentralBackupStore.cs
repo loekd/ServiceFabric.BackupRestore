@@ -57,7 +57,9 @@ namespace ServiceFabric.BackupRestore
         /// <summary>
         /// Initializes a new instance using the primary endpoint for the storage account.
         /// </summary>
-        /// <param name="primaryUri"></param>
+        /// <param name="storageUri">The azure storage URI.</param>
+        /// <exception cref="System.ArgumentNullException">storageUri</exception>
+
         public BlobStorageUri(StorageUri storageUri)
         {
             if (storageUri == null)

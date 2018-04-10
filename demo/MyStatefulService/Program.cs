@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Services.Runtime;
 using ServiceFabric.BackupRestore;
+using System.Fabric.Management.ServiceModel;
 using System.Text.RegularExpressions;
 
 namespace MyStatefulService
