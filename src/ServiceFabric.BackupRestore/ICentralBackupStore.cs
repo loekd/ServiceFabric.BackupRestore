@@ -22,12 +22,14 @@ namespace ServiceFabric.BackupRestore
 		Task<BackupMetadata> UploadBackupFolderAsync(BackupOption backupOption, Guid servicePartitionId, string sourceDirectory, CancellationToken cancellationToken);
 
 
-		/// <summary>
-		/// Saves metadata for an uploaded backup.
-		/// </summary>
-		/// <param name="destinationFolder"></param>
-		/// <param name="info"></param>
-		Task StoreBackupMetadataAsync(string destinationFolder, BackupMetadata info, CancellationToken cancellationToken = default(CancellationToken));
+        /// <summary>
+        /// Saves metadata for an uploaded backup.
+        /// </summary>
+        /// <param name="destinationFolder">The destination folder.</param>
+        /// <param name="info">The information.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        Task StoreBackupMetadataAsync(string destinationFolder, BackupMetadata info, CancellationToken cancellationToken = default(CancellationToken));
 
 		/// <summary>
 		/// Copies contents from the last known backup folder to the provided <paramref name="destinationDirectory"/> on the node.

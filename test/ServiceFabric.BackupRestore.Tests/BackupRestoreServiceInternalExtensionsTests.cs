@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Data;
-using System.Fabric;
-using System.Threading;
 using Moq;
 
 namespace ServiceFabric.BackupRestore.Tests
