@@ -41,9 +41,10 @@ namespace TestConsole
 		private static async Task MainAsync()
 		{
 			Console.WriteLine("Waiting for services....");
-
-			var proxyPartitionOne = await CreateProxyAsync(-1L);
-			var proxyPartitionTwo = await CreateProxyAsync(1L);
+		    
+            var proxyPartitionOne = await CreateProxyAsync(-1L);
+		  
+		    var proxyPartitionTwo = await CreateProxyAsync(1L);
 			var proxy = proxyPartitionOne;
 
 			Console.WriteLine("Waited for services..");
@@ -178,7 +179,9 @@ namespace TestConsole
 
 		private static async Task<IMyStatefulService> CreateProxyAsync(long partitionKey)
 		{
-			IMyStatefulService proxy = null;
+		    Console.WriteLine($"Creating Proxy: CreateProxyAsync({partitionKey})");
+
+            IMyStatefulService proxy = null;
 
 			while (proxy == null)
 			{
@@ -186,16 +189,21 @@ namespace TestConsole
 				{
 					var servicePartitionKey = new ServicePartitionKey(partitionKey);
 					proxy = ServiceProxy.Create<IMyStatefulService>(ServiceUri, servicePartitionKey, TargetReplicaSelector.Default, BackupRestoreService.BackupRestoreServiceEndpointName);
-					var result = await proxy.ListBackups();
+
+				    Console.Write("calling proxy.ListBackups");
+
+				    var result = await proxy.ListBackups();
 					if (result != null)
 					{
-						break;
+					    Console.WriteLine("succeeded");
+                        break;
 					}
 
 				}
-				catch
+				catch(Exception ex)
 				{
-					proxy = null;
+				    Console.Write(ex.ToString());
+                    proxy = null;
 					Console.Write(".");
 					await Task.Delay(200);
 				}

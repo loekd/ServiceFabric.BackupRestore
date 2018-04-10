@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.File;
 using System.IO;
 using Newtonsoft.Json;
 using System.Globalization;
@@ -88,7 +87,7 @@ namespace ServiceFabric.BackupRestore
                 var info = infos[0];
 
                 //download the backup from blobstore to the local node
-                string subFolder = info.BlockBlobUri.PrimaryUri.AbsolutePath.Substring(info.BlockBlobUri.PrimaryUri.AbsolutePath.IndexOf(RootFolder));
+                string subFolder = info.BlockBlobUri.PrimaryUri.AbsolutePath.Substring(info.BlockBlobUri.PrimaryUri.AbsolutePath.IndexOf(RootFolder, StringComparison.Ordinal));
                 var backupFolder = _blobContainer.GetDirectoryReference(subFolder);
                 await DownloadFolderAsync(backupFolder, destinationDirectory, cancellationToken);
             }
@@ -96,7 +95,6 @@ namespace ServiceFabric.BackupRestore
             {
                 throw new Exception("Failed to download backup", ex);
             }
-            return;
         }
               
         /// <inheritdoc />
@@ -230,7 +228,7 @@ namespace ServiceFabric.BackupRestore
 		/// <returns></returns>
 		internal string CreateDateTimeFolderName(Guid servicePartitionId, DateTime timeStamp)
         {
-            return $"{RootFolder}/{servicePartitionId.ToString("N")}/{timeStamp.ToString("yyyyMMddhhmmss")}";
+            return $"{RootFolder}/{servicePartitionId:N}/{timeStamp:yyyyMMddhhmmss}";
         }
         
         /// <summary>
@@ -245,22 +243,32 @@ namespace ServiceFabric.BackupRestore
             var metadata = new List<BlobBackupMetadata>();
             while (true)
             {
-                var blobRequestOptions = new BlobRequestOptions
-                {                    
-                };
+                var blobRequestOptions = new BlobRequestOptions();
                 var rootFolder = _blobContainer.GetDirectoryReference(RootFolder);
                 var query = await rootFolder.ListBlobsSegmentedAsync(true, BlobListingDetails.Metadata, null, token, blobRequestOptions, null);
-                foreach (CloudBlockBlob blob in query.Results.Where(f => f.Uri.AbsoluteUri.EndsWith(FileStore.ServiceFabricBackupRestoreMetadataFileName)))
+                foreach (var blob in query.Results.Where(f => f.Uri.AbsoluteUri.EndsWith(FileStore.ServiceFabricBackupRestoreMetadataFileName)))
                 {
-                    blob.Metadata.TryGetValue(nameof(BackupMetadata.BackupId), out string bckpId);
-                    blob.Metadata.TryGetValue(nameof(BackupMetadata.BackupOption), out string backupOption);
-                    blob.Metadata.TryGetValue(nameof(BackupMetadata.OriginalServicePartitionId), out string originalServicePartitionId);
-                    blob.Metadata.TryGetValue(nameof(BackupMetadata.TimeStampUtc), out string timeStampUtc);
+                    if (!(blob is CloudBlockBlob cloudBlockBlob))
+                    {
+                        continue;
+                    }
+                    cloudBlockBlob.Metadata.TryGetValue(nameof(BackupMetadata.BackupId), out string bckpId);
+                    Debug.Assert(bckpId != null, nameof(bckpId) + " != null");
                     
-                    BlobBackupMetadata element = new BlobBackupMetadata(new BlobStorageUri(blob.Parent.StorageUri), Guid.Parse(originalServicePartitionId), 
+                    cloudBlockBlob.Metadata.TryGetValue(nameof(BackupMetadata.BackupOption), out string backupOption);
+                    Debug.Assert(backupOption != null, nameof(backupOption) + " != null");
+
+                    cloudBlockBlob.Metadata.TryGetValue(nameof(BackupMetadata.OriginalServicePartitionId), out string originalServicePartitionId);
+                    Debug.Assert(originalServicePartitionId != null, nameof(originalServicePartitionId) + " != null");
+
+                    cloudBlockBlob.Metadata.TryGetValue(nameof(BackupMetadata.TimeStampUtc), out string timeStampUtc);
+
+                    BlobBackupMetadata element = new BlobBackupMetadata(
+
+                        new BlobStorageUri(blob.Parent.StorageUri),
+                        Guid.Parse(originalServicePartitionId), 
                         DateTime.ParseExact(timeStampUtc, "o", CultureInfo.InvariantCulture), 
-                        (BackupOption)Enum.Parse(typeof(BackupOption), 
-                        backupOption), 
+                        (BackupOption)Enum.Parse(typeof(BackupOption),backupOption), 
                         Guid.Parse(bckpId));
 
                     if ((backupId == null || backupId.Value == element.BackupId)
@@ -314,8 +322,8 @@ namespace ServiceFabric.BackupRestore
             BlobContinuationToken token = null;
             while (true)
             {
-                var blobRequestOptions = new BlobRequestOptions { };
-                var query = await location.ListBlobsSegmentedAsync(false, BlobListingDetails.Metadata, null, token, blobRequestOptions, null);
+                var blobRequestOptions = new BlobRequestOptions();
+                var query = await location.ListBlobsSegmentedAsync(false, BlobListingDetails.Metadata, null, token, blobRequestOptions, null, cancellationToken);
                 foreach (var blob in query.Results)
                 {
                     switch (blob)
@@ -326,7 +334,9 @@ namespace ServiceFabric.BackupRestore
                             break;
                         case CloudBlockBlob file:
                             string fileName = Path.GetFileName(file.Name);
-                            await file.DownloadToFileAsync(Path.Combine(destinationDirectory, fileName), FileMode.Create);
+                            Debug.Assert(fileName != null, nameof(fileName) + " != null");
+
+                            await file.DownloadToFileAsync(Path.Combine(destinationDirectory, fileName), FileMode.Create, cancellationToken);
                             break;
                     }
                 }
