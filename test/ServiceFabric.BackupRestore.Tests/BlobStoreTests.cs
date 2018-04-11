@@ -121,11 +121,16 @@ namespace ServiceFabric.BackupRestore.Tests
             Assert.AreNotEqual(Guid.Empty, result.BackupId);
 
             var container = store.BlobClient.GetContainerReference(ContainerName);
-            Assert.IsTrue(container.Exists());
+            Assert.IsTrue(container.ExistsAsync().ConfigureAwait(false).GetAwaiter().GetResult());
 
             var rootFolder = container.GetDirectoryReference(BlobStore.RootFolder);
 
-            var list = rootFolder.ListBlobs(true, BlobListingDetails.All).ToList();
+            var list = rootFolder.ListBlobsSegmentedAsync(true, BlobListingDetails.All, 10, new BlobContinuationToken(), null, null)
+                .ConfigureAwait(false)
+                .GetAwaiter()
+                .GetResult()
+                .Results
+                .ToList();
             Assert.AreEqual(2, list.Count(file => file.Uri.AbsoluteUri.EndsWith(testTxt)));
             Assert.AreEqual(1, list.Count(file => file.Uri.AbsoluteUri.EndsWith($"{subFolderName}/{testTxt}")));
             Assert.AreEqual(1, list.Count(file => file.Uri.AbsoluteUri.EndsWith(FileStore.ServiceFabricBackupRestoreMetadataFileName)));            

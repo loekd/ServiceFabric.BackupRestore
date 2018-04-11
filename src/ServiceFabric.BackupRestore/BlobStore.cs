@@ -179,7 +179,7 @@ namespace ServiceFabric.BackupRestore
             string destFileName = $"{destinationFolder}/{FileStore.ServiceFabricBackupRestoreMetadataFileName}";
             string json = JsonConvert.SerializeObject(info);
             var blockBlobReference = _blobContainer.GetBlockBlobReference(destFileName);
-            await blockBlobReference.UploadTextAsync(json, cancellationToken);
+            await blockBlobReference.UploadTextAsync(json, null, null, null, null, cancellationToken);
 
             blockBlobReference.Metadata.Add(nameof(BackupMetadata.BackupId), info.BackupId.ToString("N"));
             blockBlobReference.Metadata.Add(nameof(BackupMetadata.BackupOption), info.BackupOption.ToString());
@@ -217,7 +217,7 @@ namespace ServiceFabric.BackupRestore
         /// </summary>
         internal void DeleteContainer()
         {            
-            _blobContainer.DeleteIfExists();
+            _blobContainer.DeleteIfExistsAsync().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -336,7 +336,7 @@ namespace ServiceFabric.BackupRestore
                             string fileName = Path.GetFileName(file.Name);
                             Debug.Assert(fileName != null, nameof(fileName) + " != null");
 
-                            await file.DownloadToFileAsync(Path.Combine(destinationDirectory, fileName), FileMode.Create, cancellationToken);
+                            await file.DownloadToFileAsync(Path.Combine(destinationDirectory, fileName), FileMode.Create, null, null, null, cancellationToken);
                             break;
                     }
                 }
@@ -368,7 +368,7 @@ namespace ServiceFabric.BackupRestore
                 if (sourceFileName == null) continue;
                 string destFileName = $"{destinationFolder}/{Path.GetFileName(sourceFileName)}";
                 var blockBlobReference = _blobContainer.GetBlockBlobReference(destFileName);
-                await blockBlobReference.UploadFromFileAsync(sourceFileName, cancellationToken);
+                await blockBlobReference.UploadFromFileAsync(sourceFileName, null, null, null, cancellationToken);
             }
 
             return destinationFolder;
